@@ -18,18 +18,25 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-Write-Host "Downloading: Cpu Z..."
+Write-Host "Downloading: C++..."
 
-# download cpuz
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/cpuz.exe" -OutFile "$env:SystemRoot\Temp\cpuz.exe"
-
-# start cpuz
-Start-Process "$env:SystemRoot\Temp\cpuz.exe"
-
-Clear-Host
-Write-Host "- Check (XMP DOCP EXPO) is enabled"
-Write-Host "- Verify RAM is in the correct slots"
-Write-Host "- Confirm there is no mismatch in RAM modules"
-Write-Host "- At least two RAM sticks (dual channel) is ideal`n"
-
-Pause
+# download and install c++
+try {
+$packages = @(
+"Microsoft.VCRedist.2005.x86",
+"Microsoft.VCRedist.2005.x64",
+"Microsoft.VCRedist.2008.x86",
+"Microsoft.VCRedist.2008.x64",
+"Microsoft.VCRedist.2010.x86",
+"Microsoft.VCRedist.2010.x64",
+"Microsoft.VCRedist.2012.x86",
+"Microsoft.VCRedist.2012.x64",
+"Microsoft.VCRedist.2013.x86",
+"Microsoft.VCRedist.2013.x64",
+"Microsoft.VCRedist.2015+.x86",
+"Microsoft.VCRedist.2015+.x64"
+)
+foreach ($pkg in $packages) {
+Start-Process "winget" -ArgumentList "install `"$pkg`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+}
+} catch { }

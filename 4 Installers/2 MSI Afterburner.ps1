@@ -23,11 +23,10 @@ Write-Host "Installing: MSI Afterburner. Please wait...`n"
 Write-Host "GPU 'Power' & 'Power Percent' logging disabled"
 Write-Host "Causes FPS and 1% low issues`n"
 
-# download msi afterburner
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/msiafterburner.exe" -OutFile "$env:SystemRoot\Temp\msiafterburner.exe"
-
-# install msi afterburner
-Start-Process -wait "$env:SystemRoot\Temp\msiafterburner.exe" -ArgumentList "/S"
+# download and install msi afterburner
+try {
+Start-Process "winget" -ArgumentList "install `"Guru3D.Afterburner.Beta`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
 
 # new profiles folder
 New-Item -Path "$env:SystemDrive\Program Files (x86)\MSI Afterburner" -Name "Profiles" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
@@ -4733,9 +4732,8 @@ Maximized=1
 "@
 Set-Content -Path "$env:SystemDrive\Program Files (x86)\RivaTuner Statistics Server\DesktopOverlayHost.cfg" -Value $DesktopOverlayHostCfg -Force
 
-# create furmark.exe.cfg for rivatuner
-$FurMarkExeCfg = @"
-[Hooking]
-EnableHooking		= 1
-"@
-Set-Content -Path "$env:SystemDrive\Program Files (x86)\RivaTuner Statistics Server\ProfileTemplates\FurMark.exe.cfg" -Value $FurMarkExeCfg -Force
+# cleaner start menu shortcut path
+Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\MSI Afterburner\MSI Afterburner.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:AppData\Microsoft\Windows\Start Menu\Programs\MSI Afterburner" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\RivaTuner Statistics Server\RivaTuner Statistics Server.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:AppData\Microsoft\Windows\Start Menu\Programs\RivaTuner Statistics Server" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null

@@ -24,7 +24,7 @@ Write-Host "Installing: Polling..."
 New-Item -Path "$env:SystemDrive\Program Files (x86)\Polling" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
 # download gamepadla
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/polling.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Polling\Polling.exe"
+IWR "https://github.com/cakama3a/Polling/releases/download/1.3.1.4/Polling.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Polling\Polling.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell

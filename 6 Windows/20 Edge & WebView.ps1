@@ -85,8 +85,18 @@ Remove-Item -Recurse -Force "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_
 # remove edgewebview uninstaller
 cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView`" /f >nul 2>&1"
 
+# remove edge uninstaller
+$findmicrosoftedge = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+$microsoftedge = Get-ItemProperty $findmicrosoftedge -ErrorAction SilentlyContinue |
+Where-Object { $_.DisplayName -like "*Microsoft Edge*" }
+if ($microsoftedge) {
+$guid = $microsoftedge.PSChildName
+cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\$guid`" /f >nul 2>&1"
+}
+
 # remove edge shortcut
 Remove-Item -Recurse -Force "$env:SystemDrive\Windows\System32\config\systemprofile\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\Microsoft Edge.lnk" -ErrorAction SilentlyContinue | Out-Null
+Remove-Item -Recurse -Force "$env:SystemDrive\Users\Public\Desktop\Microsoft Edge.lnk" -ErrorAction SilentlyContinue | Out-Null
 
 # remove edge folders
 Remove-Item -Recurse -Force "$env:SystemDrive\Program Files (x86)\Microsoft" -ErrorAction SilentlyContinue | Out-Null
@@ -128,22 +138,20 @@ $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "Micros
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 
-# download edge installer
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/edge.exe" -OutFile "$env:SystemRoot\Temp\edge.exe"
-
-# start edge installer
-Start-Process -Wait "$env:SystemRoot\Temp\edge.exe"
+# download and install edge
+try {
+Start-Process "winget" -ArgumentList "install `"Microsoft.Edge`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
 
 # stop edge running
 $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 
-# download edge webview installer
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/edgewebview.exe" -OutFile "$env:SystemRoot\Temp\edgewebview.exe"
-
-# start edge webview installer
-Start-Process -Wait "$env:SystemRoot\Temp\edgewebview.exe"
+# download and install edge webview
+try {
+Start-Process "winget" -ArgumentList "install `"Microsoft.EdgeWebView2Runtime`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
 
 # stop edge running
 $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"

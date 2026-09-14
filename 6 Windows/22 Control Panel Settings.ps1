@@ -1306,6 +1306,13 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy]
 "LetAppsRunInBackground"=dword:00000002
 
+; disable background apps global
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Search]
+"BackgroundAppGlobalToggle"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications]
+"GlobalUserDisabled"=dword:00000001
+
 ; disable windows input experience preload
 [HKEY_CURRENT_USER\Software\Microsoft\input]
 "IsInputAppPreloadEnabled"=dword:00000000
@@ -1515,6 +1522,10 @@ E0,F6,C5,D5,0E,CA,50,00,00
 ; disable finish setting up your device
 [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement]
 "ScoobeSystemSettingEnabled"=dword:00000000
+
+; disable background blur during sign-in
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System]
+"DisableAcrylicBackgroundOnLogon"=dword:00000001
 "@
 Set-Content -Path "$env:SystemRoot\Temp\registryoptimize.reg" -Value $RegistryOptimize -Force
 
@@ -2760,6 +2771,13 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy]
 "LetAppsRunInBackground"=-
 
+; background apps global
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Search]
+"BackgroundAppGlobalToggle"=-
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications]
+"GlobalUserDisabled"=-
+
 ; disable windows input experience preload
 [HKEY_CURRENT_USER\Software\Microsoft\input]
 "IsInputAppPreloadEnabled"=-
@@ -2953,6 +2971,10 @@ Windows Registry Editor Version 5.00
 
 ; revert finish setting up your device
 [-HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement]
+
+; revert background blur during sign-in
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System]
+"DisableAcrylicBackgroundOnLogon"=-
 "@
 Set-Content -Path "$env:SystemRoot\Temp\registrydefaults.reg" -Value $RegistryDefaults -Force
 

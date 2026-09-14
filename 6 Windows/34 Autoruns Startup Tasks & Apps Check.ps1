@@ -79,8 +79,30 @@ Get-ChildItem $tasksPath | Where-Object { $_.Name -ne "Microsoft" } | ForEach-Ob
 Remove-Item $_.FullName -Recurse -Force
 }
 
-# download autoruns
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/autoruns.exe" -OutFile "$env:SystemRoot\Temp\autoruns.exe"
+# remove winget app from install entry to force upgrade/install/fix
+try {
+Start-Process "winget" -ArgumentList "uninstall --product-code Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
+} catch { }
+
+# download and install autoruns
+try {
+Start-Process "winget" -ArgumentList "install `"Microsoft.Sysinternals.Autoruns`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
+
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\Autoruns.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\Autoruns64.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
+
+# create start menu shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Autoruns.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\Autoruns64.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
 
 # start autoruns
-Start-Process "$env:SystemRoot\Temp\autoruns.exe"
+Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\Autoruns64.exe"

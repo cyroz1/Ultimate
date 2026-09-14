@@ -8,9 +8,19 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-# get motherboard id
-$instanceID = (Get-CimInstance Win32_BaseBoard).Product
-$query = [uri]::EscapeDataString($instanceID)
+        # SCRIPT CHECK INTERNET
+        if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
+        Write-Host "Internet Connection Required`n" -ForegroundColor Red
+        Pause
+        exit
+        }
 
-# search motherboard id in web browser
-Start-Process "https://www.google.com/search?q=$query"
+        # SCRIPT SILENT
+        $progresspreference = 'silentlycontinue'
+
+Write-Host "Downloading: DirectX..."
+
+# download and install directx
+try {
+Start-Process "winget" -ArgumentList "install `"Microsoft.DirectX`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }

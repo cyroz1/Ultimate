@@ -19,9 +19,6 @@ Enable-ComputerRestore -Drive "C:\" -ErrorAction SilentlyContinue | Out-Null
 
 # create restore point
 Checkpoint-Computer -Description "backup" -RestorePointType "MODIFY_SETTINGS" -ErrorAction SilentlyContinue | Out-Null
-
-# revert allow multiple restore points
-cmd /c "reg delete `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore`" /v `"SystemRestorePointCreationFrequency`" /f >nul 2>&1"
 } catch { }
 
 # open system protection

@@ -232,17 +232,23 @@ $_.Name -like '*Xbox*' -or
 $_.Name -like '*Store*'
 } | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 
-# download edge webview installer
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/edgewebview.exe" -OutFile "$env:SystemRoot\Temp\edgewebview.exe"
+# download and install edge webview
+try {
+Start-Process "winget" -ArgumentList "install `"Microsoft.EdgeWebView2Runtime`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
 
-# start edge webview installer
-Start-Process -Wait "$env:SystemRoot\Temp\edgewebview.exe"
+# remove winget app from install entry to force upgrade/install/fix
+try {
+Start-Process "winget" -ArgumentList "uninstall --product-code Microsoft.Gaming.GamingServicesRepairTool_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
+} catch { }
 
 # download gamebar repair tool
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/gamingrepairtool.exe" -OutFile "$env:SystemRoot\Temp\gamingrepairtool.exe"
+try {
+Start-Process "winget" -ArgumentList "install `"Microsoft.Gaming.GamingServicesRepairTool`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
 
-# start gamebar repair too
-Start-Process "$env:SystemRoot\Temp\gamingrepairtool.exe"
+# start gamebar repair tool
+Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Gaming.GamingServicesRepairTool_Microsoft.Winget.Source_8wekyb3d8bbwe\gamingrepairtool.exe"
 
 exit
 

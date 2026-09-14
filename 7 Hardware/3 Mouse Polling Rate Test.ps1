@@ -18,33 +18,8 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-Write-Host "Installing: Mouse Movement Recorder...`n"
-
-# new folder
-New-Item -Path "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-
-# download mouse movement recorder
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/mousemovementrecorder.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder\Mouse Movement Recorder.exe"
-
-# create desktop shortcut
-$WshShell = New-Object -comObject WScript.Shell
-$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
-$Shortcut = $WshShell.CreateShortcut("$Desktop\Mouse Movement Recorder.lnk")
-$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder\Mouse Movement Recorder.exe"
-$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder"
-$Shortcut.IconLocation = "%SystemRoot%\System32\shell32.dll,248"
-$Shortcut.Save()
-
-# create start menu shortcut
-$WshShell = New-Object -comObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Mouse Movement Recorder.lnk")
-$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder\Mouse Movement Recorder.exe"
-$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder"
-$Shortcut.IconLocation = "%SystemRoot%\System32\shell32.dll,248"
-$Shortcut.Save()
-
-# open mouse movement recorder
-Start-Process "$env:SystemDrive\Program Files (x86)\Mouse Movement Recorder\Mouse Movement Recorder.exe"
+# open polling test
+Start-Process "https://cpstest.org/polling-rate-test"
 
 Clear-Host
 Write-Host "Mouse optimizations:`n"

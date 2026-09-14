@@ -18,25 +18,10 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-# download 7zip
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
-
-# install 7zip
-Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
-
-# set config for 7zip
-cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
-cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-
-# cleaner 7zip start menu shortcut path
-Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-
         # FUNCTION SHOW-MENU
         function show-menu {
         Clear-Host
-        Write-Host "INSTALL GRAPHICS DRIVERS" -ForegroundColor Yellow
-        Write-Host "SELECT YOUR SYSTEM'S GPU" -ForegroundColor Yellow
+        Write-Host "INSTALL UPDATED GRAPHICS DRIVER & IMPORT SETTINGS" -ForegroundColor Yellow
         Write-Host " 1.  NVIDIA" -ForegroundColor Green
         Write-Host " 2.  AMD" -ForegroundColor Red
         Write-Host " 3.  INTEL`n" -ForegroundColor Blue
@@ -50,61 +35,54 @@ Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recu
 
         Clear-Host
 
-        Write-Host "DOWNLOAD NVIDIA GPU DRIVER`n" -ForegroundColor Yellow
+        Write-Host "NVIDIA APP TURN OFF:"
+        Write-Host "- Statistics"
+        Write-Host "- Game Filters"
+        Write-Host "- Automatically optimize newly added games and apps`n"
+        Write-Host "DOWNLOADING LATEST NVIDIA GPU DRIVER`n"
     	## explorer "https://www.nvidia.com/en-us/drivers"
+    	## explorer "C:\Program Files\NVIDIA Corporation\NVIDIA App\CEF\NVIDIA App.exe"
 		## shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel
+    	## explorer "%LOCALAPPDATA%\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
 
-# download driver
-Start-Sleep -Seconds 5
-Start-Process "https://www.nvidia.com/en-us/drivers"
-Pause
-Clear-Host
+# download and install 7-zip
+try {
+Start-Process "winget" -ArgumentList "install `"7zip.7zip`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
 
-        Write-Host ""
-        Write-Host "SELECT DOWNLOADED DRIVER`n" -ForegroundColor Yellow
+# set config for 7zip
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# select driver
-Start-Sleep -Seconds 5
-Add-Type -AssemblyName System.Windows.Forms
-$Dialog = New-Object System.Windows.Forms.OpenFileDialog
-$Dialog.Filter = "All Files (*.*)|*.*"
-$Dialog.ShowDialog() | Out-Null
-$InstallFile = $Dialog.FileName
+# cleaner start menu shortcut path
+Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 
-        Write-Host "DEBLOATING DRIVER`n"
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\7-Zip File Manager.lnk")
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files\7-Zip\7zFM.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files\7-Zip"
+$Shortcut.Save()
+
+# find latest nvidia driver
+$uri = 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=120&pfid=929&osID=57&languageCode=1033&isWHQL=1&dch=1&sort1=0&numberOfResults=1'
+$response = Invoke-WebRequest -Uri $uri -Method GET -UseBasicParsing
+$payload = $response.Content | ConvertFrom-Json
+$version =  $payload.IDS[0].downloadInfo.Version
+$windowsVersion = if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {"win10-win11"} else {"win8-win7"}
+$windowsArchitecture = if ([Environment]::Is64BitOperatingSystem) {"64bit"} else {"32bit"}
+$url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-dch-whql.exe"
+Write-Output "Downloading: Nvidia Driver $version ..."
+
+# download nvidia driver
+IWR $url -OutFile "$env:SystemRoot\Temp\nvidiadriver.exe"
 
 # extract driver with 7zip
-& "$env:SystemDrive\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemRoot\Temp\nvidiadriver" -y | Out-Null
+& "$env:SystemDrive\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\nvidiadriver.exe" -o"$env:SystemRoot\Temp\nvidiadriver" -y | Out-Null
 
-# debloat nvidia driver
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\Display.Nview" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\FrameViewSDK" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\HDAudio" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\MSVCRT" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp.MessageBus" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvBackend" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvContainer" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvCpl" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvDLISR" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NVPCF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvTelemetry" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvVAD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\PhysX" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\PPC" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\ShadowPlay" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\CEF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\osc" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\Plugins" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\UpgradeConsent" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\www" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\7z.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\7z.exe" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\DarkModeCheck.exe" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\InstallerExtension.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\NvApp.nvi" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\NvAppApi.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\NvAppExt.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\NvConfigGenerator.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+Clear-Host
 
         Write-Host "INSTALLING DRIVER`n"
 
@@ -116,16 +94,18 @@ try {
 Start-Process "winget" -ArgumentList "install `"9NF8H0H7WMLT`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
 } catch { }
 
-# uninstall winget
-Get-AppxPackage -allusers *Microsoft.Winget.Source* | Remove-AppxPackage -ErrorAction SilentlyContinue
-
-# delete download
-Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\NVIDIA Control Panel.lnk")
+$Shortcut.TargetPath = "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+$Shortcut.WorkingDirectory = "shell:appsFolder"
+$Shortcut.Save()
 
 # delete old driver files
 Remove-Item "$env:SystemDrive\NVIDIA" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 
-        Write-Host "IMPORTING SETTINGS`n"
+        Write-Host "IMPORTING SETTINGS"
 
 # turn on disable dynamic pstate
 $subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
@@ -170,8 +150,30 @@ cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"Ena
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# download inspector
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/inspector.exe" -OutFile "$env:SystemRoot\Temp\inspector.exe"
+# remove winget app from install entry to force upgrade/install/fix
+try {
+Start-Process "winget" -ArgumentList "uninstall --product-code Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
+} catch { }
+
+# download and install nvidia profile inspector
+try {
+Start-Process "winget" -ArgumentList "install `"Orbmu2k.nvidiaProfileInspector`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
+
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
+
+# create start menu shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
 
 # set config for inspector
 $nipfile = @'
@@ -374,129 +376,44 @@ $nipfile = @'
 Set-Content -Path "$env:SystemRoot\Temp\inspector.nip" -Value $nipfile -Force
 
 # import nip
-Start-Process -wait "$env:SystemRoot\Temp\inspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
+Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
 
         break MainLoop
 
           }
-    	2 {
+        2 {
 
         Clear-Host
 
-        Write-Host "DOWNLOAD AMD GPU DRIVER`n" -ForegroundColor Yellow
+        Write-Host "DOWNLOADING LATEST AMD GPU DRIVER`n"
 		## explorer "https://www.amd.com/en/support/download/drivers.html"
 		## C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe
 
-# download driver
-Start-Sleep -Seconds 5
-Start-Process "https://www.amd.com/en/support/download/drivers.html"
-Pause
+# download amd driver auto detect
+$DownloadAmd = Invoke-WebRequest "https://www.amd.com/en/support/download/drivers.html" -UseBasicParsing |
+Select-Object -ExpandProperty Links |
+Where-Object { $_.href -match "drivers\.amd\.com/drivers/installer/.*/whql/amd-software-adrenalin-edition-.*-minimalsetup-.*_web\.exe" } | Select-Object href
+$spoofwebbrowser = @{
+"User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+"Accept"     = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+"Referer"    = "https://www.amd.com/"
+}
+IWR $DownloadAmd.href -UseBasicParsing -Headers $spoofwebbrowser -OutFile "$env:SystemRoot\Temp\amddriver.exe" -ErrorAction SilentlyContinue | Out-Null
+
 Clear-Host
-
-        Write-Host ""
-        Write-Host "SELECT DOWNLOADED DRIVER`n" -ForegroundColor Yellow
-
-# select driver
-Start-Sleep -Seconds 5
-Add-Type -AssemblyName System.Windows.Forms
-$Dialog = New-Object System.Windows.Forms.OpenFileDialog
-$Dialog.Filter = "All Files (*.*)|*.*"
-$Dialog.ShowDialog() | Out-Null
-$InstallFile = $Dialog.FileName
-
-        Write-Host "DEBLOATING DRIVER`n"
-
-# extract driver with 7zip
-& "$env:SystemDrive\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemRoot\Temp\amddriver" -y | Out-Null
-
-# edit xml files, set enabled & hidden to false
-$xmlFiles = @(
-"$env:SystemRoot\Temp\amddriver\Config\AMDAUEPInstaller.xml"
-"$env:SystemRoot\Temp\amddriver\Config\AMDCOMPUTE.xml"
-"$env:SystemRoot\Temp\amddriver\Config\AMDLinkDriverUpdate.xml"
-"$env:SystemRoot\Temp\amddriver\Config\AMDRELAUNCHER.xml"
-"$env:SystemRoot\Temp\amddriver\Config\AMDScoSupportTypeUpdate.xml"
-"$env:SystemRoot\Temp\amddriver\Config\AMDUpdater.xml"
-"$env:SystemRoot\Temp\amddriver\Config\AMDUWPLauncher.xml"
-"$env:SystemRoot\Temp\amddriver\Config\EnableWindowsDriverSearch.xml"
-"$env:SystemRoot\Temp\amddriver\Config\InstallUEP.xml"
-"$env:SystemRoot\Temp\amddriver\Config\ModifyLinkUpdate.xml"
-)
-foreach ($file in $xmlFiles) {
-if (Test-Path $file) {
-$content = Get-Content $file -Raw
-$content = $content -replace '<Enabled>true</Enabled>', '<Enabled>false</Enabled>'
-$content = $content -replace '<Hidden>true</Hidden>', '<Hidden>false</Hidden>'
-Set-Content $file -Value $content -NoNewline
-}
-}
-
-# edit json files, set installbydefault to no
-$jsonFiles = @(
-"$env:SystemRoot\Temp\amddriver\Config\InstallManifest.json"
-"$env:SystemRoot\Temp\amddriver\Bin64\cccmanifest_64.json"
-)
-foreach ($file in $jsonFiles) {
-if (Test-Path $file) {
-$content = Get-Content $file -Raw
-$content = $content -replace '"InstallByDefault"\s*:\s*"Yes"', '"InstallByDefault" : "No"'
-Set-Content $file -Value $content -NoNewline
-}
-}
 
         Write-Host "INSTALLING DRIVER`n"
 
-# install amd driver
-Start-Process -Wait "$env:SystemRoot\Temp\amddriver\Bin64\ATISetup.exe" -ArgumentList "-INSTALL -VIEW:2" -WindowStyle Hidden
+# open amd web driver installer
+Start-Process -Wait "$env:SystemRoot\Temp\amddriver.exe"
 
-# delete amdnoisesuppression startup
-cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"AMDNoiseSuppression`" /f >nul 2>&1"
-
-# delete startrsx startup
-cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"StartRSX`" /f >nul 2>&1"
-
-# delete startcn task
-Unregister-ScheduledTask -TaskName "StartCN" -Confirm:$false -ErrorAction SilentlyContinue
-
-# delete amd crash defender service
-cmd /c "sc stop `"AMD Crash Defender Service`" >nul 2>&1"
-cmd /c "sc delete `"AMD Crash Defender Service`" >nul 2>&1"
-
-# delete amd crash defender driver
-cmd /c "sc stop `"amdfendr`" >nul 2>&1"
-cmd /c "sc delete `"amdfendr`" >nul 2>&1"
-
-# delete amd crash defender manager driver
-cmd /c "sc stop `"amdfendrmgr`" >nul 2>&1"
-cmd /c "sc delete `"amdfendrmgr`" >nul 2>&1"
-
-# delete amd audio coprocessr dsp driver
-cmd /c "sc stop `"amdacpbus`" >nul 2>&1"
-cmd /c "sc delete `"amdacpbus`" >nul 2>&1"
-
-# delete amd streaming audio function driver
-cmd /c "sc stop `"AMDSAFD`" >nul 2>&1"
-cmd /c "sc delete `"AMDSAFD`" >nul 2>&1"
-
-# delete amd function driver for hd audio service driver
-cmd /c "sc stop `"AtiHDAudioService`" >nul 2>&1"
-cmd /c "sc delete `"AtiHDAudioService`" >nul 2>&1"
-
-# delete amd bug report tool
-Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\AMD Bug Report Tool" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemDrive\Windows\SysWOW64\AMDBugReportTool.exe" -Force -ErrorAction SilentlyContinue | Out-Null
-
-# uninstall amd install manager
-$findamdinstallmanager = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
-$amdinstallmanager = Get-ItemProperty $findamdinstallmanager -ErrorAction SilentlyContinue |
-Where-Object { $_.DisplayName -like "*AMD Install Manager*" }
-if ($amdinstallmanager) {
-$guid = $amdinstallmanager.PSChildName
-Start-Process "msiexec.exe" -ArgumentList "/x $guid /qn /norestart" -Wait -NoNewWindow
-}
-
-# delete download
-Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\AMD Radeon Software.lnk")
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files\AMD\CNext\CNext\RadeonSoftware.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files\AMD\CNext\CNext"
+$Shortcut.Save()
 
 # cleaner start menu shortcut path
 $folderName = "AMD Software$([char]0xA789) Adrenalin Edition"
@@ -507,7 +424,6 @@ Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\$folderName"
 Remove-Item "$env:SystemDrive\AMD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 
         Write-Host "IMPORTING SETTINGS"
-        Write-Host "IGNORE RSSERVCMD.EXE ERROR`n" -ForegroundColor Red
 
 # open & close amd software adrenalin edition settings page so settings stick
 Start-Process "$env:SystemDrive\Program Files\AMD\CNext\CNext\RadeonSoftware.exe"
@@ -589,11 +505,11 @@ cmd /c "reg add `"HKCU\Software\AMD\CN\VirtualSuperResolution`" /v `"AlreadyNoti
         break MainLoop
 
           }
-    	3 {
+        3 {
 
         Clear-Host
-        
-        Write-Host "DOWNLOAD INTEL GPU DRIVER`n" -ForegroundColor Yellow
+
+        Write-Host "DOWNLOAD LATEST INTEL GPU DRIVER`n" -ForegroundColor Yellow
 		## explorer "https://www.intel.com/content/www/us/en/search.html#sortCriteria=%40lastmodifieddt%20descending&f-operatingsystem_en=Windows%2011%20Family*&f-downloadtype=Drivers&cf-tabfilter=Downloads&cf-downloadsppth=Graphics"
 		## shell:appsFolder\AppUp.IntelGraphicsExperience_8j3eq9eme6ctt!App
 		## C:\Program Files\Intel\Intel Graphics Software\IntelGraphicsSoftware.exe
@@ -614,54 +530,20 @@ $Dialog = New-Object System.Windows.Forms.OpenFileDialog
 $Dialog.Filter = "All Files (*.*)|*.*"
 $Dialog.ShowDialog() | Out-Null
 $InstallFile = $Dialog.FileName
-
-        Write-Host "DEBLOATING DRIVER`n"
-
-# extract driver with 7zip
-& "$env:SystemDrive\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemDrive\inteldriver" -y | Out-Null
+Clear-Host
 
         Write-Host "INSTALLING DRIVER`n"
 
 # install intel driver
-Start-Process "cmd.exe" -ArgumentList "/c `"$env:SystemDrive\inteldriver\Installer.exe`" -f --noExtras --terminateProcesses -s" -WindowStyle Hidden -Wait
+Start-Process -Wait "$InstallFile"
 
-# install intel control panel
-$IntelGraphicsSoftware = Get-ChildItem "$env:SystemDrive\inteldriver\Resources\Extras\IntelGraphicsSoftware_*.exe" | Select-Object -First 1 -ExpandProperty Name
-if ($IntelGraphicsSoftware) {
-Start-Process "$env:SystemDrive\inteldriver\Resources\Extras\$IntelGraphicsSoftware" -ArgumentList "/s" -Wait -NoNewWindow
-}
-
-# delete intel® graphics software startup
-$FileName = "Intel$([char]0xAE) Graphics Software"
-cmd /c "reg delete `"HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run`" /v `"$FileName`" /f >nul 2>&1"
-
-# delete intelgfxfwupdatetool service
-cmd /c "sc stop `"IntelGFXFWupdateTool`" >nul 2>&1"
-cmd /c "sc delete `"IntelGFXFWupdateTool`" >nul 2>&1"
-
-# delete intel® content protection hdcp service
-cmd /c "sc stop `"cplspcon`" >nul 2>&1"
-cmd /c "sc delete `"cplspcon`" >nul 2>&1"
-
-# delete intel(r) cta child driver driver
-cmd /c "sc stop `"CtaChildDriver`" >nul 2>&1"
-cmd /c "sc delete `"CtaChildDriver`" >nul 2>&1"
-
-# delete intel(r) graphics system controller auxiliary firmware interface driver
-cmd /c "sc stop `"GSCAuxDriver`" >nul 2>&1"
-cmd /c "sc delete `"GSCAuxDriver`" >nul 2>&1"
-
-# delete intel(r) graphics system controller firmware interface driver
-cmd /c "sc stop `"GSCx64`" >nul 2>&1"
-cmd /c "sc delete `"GSCx64`" >nul 2>&1"
-
-# stop intelgraphicssoftware presentmonservice running
-$stop = "IntelGraphicsSoftware", "PresentMonService"
-$stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
-Start-Sleep -Seconds 2
-
-# delete presentmonservice.exe
-Remove-Item "$env:SystemDrive\Program Files\Intel\Intel Graphics Software\PresentMonService.exe" -Force -ErrorAction SilentlyContinue | Out-Null 
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\Intel Graphics Software.lnk")
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files\Intel\Intel Graphics Software\IntelGraphicsSoftware.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files\Intel\Intel Graphics Software"
+$Shortcut.Save()
 
 # delete download
 Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -706,36 +588,19 @@ $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"Global_LowLatency`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 }
 
+# disable global windows variable refresh rate to stop screen flicker/driver conflict
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\Microsoft\DirectX\UserGpuPreferences`" /v `"DirectXUserGlobalSettings`" /t REG_SZ /d `"SwapEffectUpgradeEnable=1;VRROptimizeEnable=0;`" /f >nul 2>&1"
+
         break MainLoop
 
-          }
-          }
-          } else {
-          Write-Host "Invalid input. Please select a valid option (1-3).`n" -ForegroundColor Yellow
-          Pause
-          show-menu
-          }
-          }
-
-        Clear-Host
-        Write-Host "SET" -ForegroundColor Yellow
-        Write-Host "- SOUND" -ForegroundColor Yellow
-        Write-Host "- RESOLUTION" -ForegroundColor Yellow
-        Write-Host "- REFRESH RATE" -ForegroundColor Yellow
-        Write-Host "- PRIMARY DISPLAY`n" -ForegroundColor Yellow
-		## shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel
-    	## ms-settings:display
-		## mmsys.cpl
-
-# open display, nvidia & sound panels
-try {
-Start-Process "ms-settings:display"
-} catch { }
-try {
-Start-Process shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel
-} catch { }
-Start-Process mmsys.cpl
-Pause
+        }
+        }
+        } else {
+        Write-Host "Invalid input. Please select a valid option (1-3).`n" -ForegroundColor Yellow
+        Pause
+        show-menu
+        }
+        }
 
         Clear-Host
 

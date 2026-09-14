@@ -150,6 +150,8 @@ powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-482
 # turn off display after 10 min - oled protection
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e 600 2>$null
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e 600 2>$null
+powercfg /requestsoverride PROCESS "chrome.exe" DISPLAY SYSTEM AWAYMODE 2>$null
+powercfg /requestsoverride PROCESS "Discord.exe" DISPLAY SYSTEM AWAYMODE 2>$null
 
 # display brightness 100%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 aded5e82-b909-4619-9949-f5d71dac0bcb 0x00000064 2>$null
@@ -238,6 +240,10 @@ Clear-Host
 
 # restore powerplans
 powercfg -restoredefaultschemes
+
+# revert turn off display after 10 min - oled protection
+powercfg /requestsoverride PROCESS "chrome.exe" 2>$null
+powercfg /requestsoverride PROCESS "Discord.exe" 2>$null
 
 # enable hibernate
 cmd /c "powercfg /hibernate on >nul 2>&1"

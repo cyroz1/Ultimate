@@ -18,39 +18,30 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-# download 7zip
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
-
-# install 7zip
-Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
-
-# set config for 7zip
-cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
-cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-
-# cleaner 7zip start menu shortcut path
-Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-
-Write-Host "Installing: Nvidia Control Panel"
+Write-Host "Installing: Legacy Nvidia Control Panel..."
 
 # install nvidia control panel
 try {
 Start-Process "winget" -ArgumentList "install `"9NF8H0H7WMLT`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
 } catch { }
 
-# uninstall winget
-Get-AppxPackage -allusers *Microsoft.Winget.Source* | Remove-AppxPackage -ErrorAction SilentlyContinue
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\NVIDIA Control Panel.lnk")
+$Shortcut.TargetPath = "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+$Shortcut.WorkingDirectory = "shell:appsFolder"
+$Shortcut.Save()
 
 Clear-Host
 
-       Write-Host "1. NVIDIA Settings: On (Recommended)"
-       Write-Host "2. NVIDIA Settings: Default`n"
-       while ($true) {
-       $choice = Read-Host " "
-       if ($choice -match '^[1-2]$') {
-       switch ($choice) {
-       1 {
+        Write-Host "1. NVIDIA Settings: On (Recommended)"
+        Write-Host "2. NVIDIA Settings: Default`n"
+        while ($true) {
+        $choice = Read-Host " "
+        if ($choice -match '^[1-2]$') {
+        switch ($choice) {
+        1 {
 
 Clear-Host
 
@@ -81,8 +72,30 @@ cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"Ena
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# download inspector
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/inspector.exe" -OutFile "$env:SystemRoot\Temp\inspector.exe"
+# remove winget app from install entry to force upgrade/install/fix
+try {
+Start-Process "winget" -ArgumentList "uninstall --product-code Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
+} catch { }
+
+# download and install nvidia profile inspector
+try {
+Start-Process "winget" -ArgumentList "install `"Orbmu2k.nvidiaProfileInspector`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
+
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
+
+# create start menu shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
 
 # set config for inspector
 $nipfile = @'
@@ -285,15 +298,15 @@ $nipfile = @'
 Set-Content -Path "$env:SystemRoot\Temp\inspector.nip" -Value $nipfile -Force
 
 # import nip
-Start-Process -wait "$env:SystemRoot\Temp\inspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
+Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
 
 # open nvidiacontrolpanel
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 
 exit
 
-         }
-       2 {
+          }
+        2 {
 
 Clear-Host
 
@@ -324,8 +337,30 @@ cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"Ena
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
 
-# download inspector
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/inspector.exe" -OutFile "$env:SystemRoot\Temp\inspector.exe"
+# remove winget app from install entry to force upgrade/install/fix
+try {
+Start-Process "winget" -ArgumentList "uninstall --product-code Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
+} catch { }
+
+# download and install nvidia profile inspector
+try {
+Start-Process "winget" -ArgumentList "install `"Orbmu2k.nvidiaProfileInspector`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
+
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
+
+# create start menu shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.Save()
 
 # set config for inspector
 $nipfile = @'
@@ -341,12 +376,12 @@ $nipfile = @'
 Set-Content -Path "$env:SystemRoot\Temp\inspector.nip" -Value $nipfile -Force
 
 # import nip
-Start-Process -wait "$env:SystemRoot\Temp\inspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
+Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
 
 # open nvidiacontrolpanel
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 
 exit
 
-         }
-       } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
+          }
+        } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }

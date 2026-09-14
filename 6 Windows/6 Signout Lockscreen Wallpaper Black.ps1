@@ -40,6 +40,9 @@ cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Personalization
 cmd /c "reg add `"HKCU\Control Panel\Desktop`" /v `"Wallpaper`" /t REG_SZ /d `"C:\Windows\Black.jpg`" /f >nul 2>&1"
 rundll32.exe user32.dll, UpdatePerUserSystemParameters
 
+# disable background blur during sign-in
+cmd /c "reg add `"HKLM\SOFTWARE\Policies\Microsoft\Windows\System`" /v `"DisableAcrylicBackgroundOnLogon`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
 exit
 
           }
@@ -56,6 +59,9 @@ rundll32.exe user32.dll, UpdatePerUserSystemParameters
 
 # delete image
 Remove-Item -Recurse -Force "C:\Windows\Black.jpg" -ErrorAction SilentlyContinue | Out-Null
+
+# revert background blur during sign-in
+cmd /c "reg delete `"HKLM\SOFTWARE\Policies\Microsoft\Windows\System`" /v `"DisableAcrylicBackgroundOnLogon`" /f >nul 2>&1"
 
 exit
 

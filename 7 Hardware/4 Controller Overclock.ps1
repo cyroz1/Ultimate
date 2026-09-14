@@ -21,16 +21,13 @@
 Write-Host "Installing: hidusbf..."
 
 # download hidusbf
-IWR "https://github.com/FR33THYFR33THY/Ultimate-Files/raw/refs/heads/main/hidusbf.zip" -OutFile "$env:SystemRoot\Temp\hidusbf.zip"
+IWR "https://github.com/LordOfMice/hidusbf/raw/refs/heads/master/hidusbf.zip" -OutFile "$env:SystemRoot\Temp\hidusbf.zip"
 
 # extract file
 Expand-Archive -Path "$env:SystemRoot\Temp\hidusbf.zip" -DestinationPath "$env:SystemDrive\Program Files (x86)\hidusbf" -Force
 
-# move files
-Move-Item -Path "$env:SystemDrive\Program Files (x86)\hidusbf\hidusbf (BB11.5.25)\*" -Destination "$env:SystemDrive\Program Files (x86)\hidusbf" -Force
-
-# delete folder
-Remove-Item "$env:SystemDrive\Program Files (x86)\hidusbf\hidusbf (BB11.5.25)" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+# install hidusbf_as.inf
+Start-Process -FilePath "rundll32.exe" -ArgumentList "setupapi.dll,InstallHinfSection DefaultInstall 132 $env:SystemDrive\Program Files (x86)\hidusbf\DRIVER\HIDUSBF_AS.INF" -Wait
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
