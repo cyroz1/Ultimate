@@ -11,6 +11,8 @@ The original toolkit scripts are kept byte-for-byte identical to the upstream re
 
 The application requests administrator rights because the original scripts change system settings. A Windows UAC prompt may still appear; that is the standard Windows security prompt, not a console window. Some scripts intentionally open Windows Settings, browsers, installers, or other graphical tools.
 
+See [SCRIPT_GUIDE.md](SCRIPT_GUIDE.md) for a brief explanation of every bundled script.
+
 ### Download
 
 Download and run the latest `Ultimate-UI-v*-win-x64.msi` from the fork's [Releases](../../releases) page. The installer places the toolkit under Program Files, adds an Ultimate shortcut to the Start menu, and registers normal Windows uninstall/upgrade support.

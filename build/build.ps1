@@ -69,7 +69,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $itemsToCopy = @(
     "1 Check", "2 Refresh", "3 Setup", "4 Installers", "5 Graphics", "6 Windows", "7 Hardware", "8 Advanced",
-    "AllowScripts.cmd", "IWR.ps1", "README.md", "LICENSE"
+    "AllowScripts.cmd", "IWR.ps1", "README.md", "SCRIPT_GUIDE.md", "LICENSE"
 )
 foreach ($item in $itemsToCopy) {
     $source = Join-Path $repoRoot $item
