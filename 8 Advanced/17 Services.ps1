@@ -954,7 +954,7 @@ $ServicesOffPs1 = "$env:SystemRoot\Temp\servicesoff.ps1"
 (Get-Content $ServicesOffPs1 -Raw) -replace "``'@","'@" | Set-Content $ServicesOffPs1 -NoNewline
 
 # install runonce servicesoff ps1 file to run in safe boot
-cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*servicesoff`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Hidden -f $env:SystemRoot\Temp\servicesoff.ps1`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*servicesoff`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\servicesoff.ps1`" /f >nul 2>&1"
 
 # turn on safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -1886,7 +1886,7 @@ $ServicesOnPs1 = "$env:SystemRoot\Temp\serviceson.ps1"
 (Get-Content $ServicesOnPs1 -Raw) -replace "``'@","'@" | Set-Content $ServicesOnPs1 -NoNewline
 
 # install runonce serviceson ps1 file to run in safe boot
-cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*serviceson`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Hidden -f $env:SystemRoot\Temp\serviceson.ps1`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*serviceson`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\serviceson.ps1`" /f >nul 2>&1"
 
 # turn on safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"

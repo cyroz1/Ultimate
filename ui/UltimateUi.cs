@@ -1299,7 +1299,7 @@ namespace UltimateUi
         {
             if (relative.Equals("IWR.ps1", StringComparison.OrdinalIgnoreCase))
             {
-                return "Fork bootstrapper: downloads this repository's source toolkit into a desktop folder and opens it.";
+                return "Bootstrapper: downloads the upstream source toolkit into a desktop folder and opens it.";
             }
             return "Runs the original " + title + " automation with its menu choices and prompts supplied by this UI.";
         }
@@ -1328,7 +1328,7 @@ namespace UltimateUi
             }
             if (upper.Contains("IWR.PS1"))
             {
-                return "Bootstrapper: downloads and launches this fork's repository contents.";
+                return "Bootstrapper: downloads and launches the upstream repository contents.";
             }
             return "Administrator rights are required; some actions change Windows settings or open another Windows tool.";
         }

@@ -5,7 +5,9 @@
 
 ## Ultimate UI
 
-This fork adds a native Windows Forms launcher for the complete PowerShell toolkit. The launcher discovers every `.ps1` script, turns numeric menus into native radio controls, provides fields for account/USB/process/priority values, and runs scripts through a hidden PowerShell host. Users do not need to open a terminal or type menu choices.
+This fork adds a native Windows Forms launcher for the complete PowerShell toolkit. The launcher discovers every original `.ps1` script, turns numeric menus into native radio controls, provides fields for account/USB/process/priority values, and runs the untouched script through a hidden PowerShell host. Users do not need to open a terminal or type menu choices.
+
+The original toolkit scripts are kept byte-for-byte identical to the upstream repository. The UI does not translate, patch, or reimplement their commands: it starts the same Windows PowerShell engine and invokes the selected file directly. Only the prompt transport is supplied by the UI so `Read-Host` and `Pause` do not require a visible console.
 
 The application requests administrator rights because the original scripts change system settings. A Windows UAC prompt may still appear; that is the standard Windows security prompt, not a console window. Some scripts intentionally open Windows Settings, browsers, installers, or other graphical tools.
 

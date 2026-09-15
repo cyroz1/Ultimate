@@ -42,14 +42,10 @@ function global:Pause {
 
 $ErrorActionPreference = "Continue"
 
-try {
-    & $ScriptPath
-    if ($null -ne $global:LASTEXITCODE) {
-        exit $global:LASTEXITCODE
-    }
-    exit 0
+# Invoke the selected file directly. No script text is loaded, rewritten, or
+# regenerated here; this wrapper only supplies the UI-backed prompt functions.
+& $ScriptPath
+if ($null -ne $global:LASTEXITCODE) {
+    exit $global:LASTEXITCODE
 }
-catch {
-    Write-Error $_
-    exit 1
-}
+exit 0
