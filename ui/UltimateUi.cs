@@ -294,6 +294,7 @@ namespace UltimateUi
     {
         private const string InputMarker = "__ULTIMATE_INPUT__";
         private const string PauseMarker = "__ULTIMATE_PAUSE__";
+        private const string FilePickerMarker = "__ULTIMATE_FILE_PICKER__";
 
         private static readonly Color Background = Color.FromArgb(15, 23, 42);
         private static readonly Color Surface = Color.FromArgb(30, 41, 59);
@@ -1020,6 +1021,11 @@ namespace UltimateUi
             {
                 return;
             }
+            if (line.StartsWith(FilePickerMarker, StringComparison.Ordinal))
+            {
+                ResolveFilePicker(line.Substring(FilePickerMarker.Length));
+                return;
+            }
             if (line.StartsWith(InputMarker, StringComparison.Ordinal))
             {
                 string prompt = line.Substring(InputMarker.Length);
@@ -1054,6 +1060,41 @@ namespace UltimateUi
                     else
                     {
                         CancelRunningScript();
+                    }
+                }
+            });
+        }
+
+        private void ResolveFilePicker(string filter)
+        {
+            BeginInvoke((Action)delegate
+            {
+                if (runner == null)
+                {
+                    return;
+                }
+
+                using (OpenFileDialog dialog = new OpenFileDialog())
+                {
+                    dialog.Title = "Select downloaded driver";
+                    dialog.CheckFileExists = true;
+                    dialog.Multiselect = false;
+                    dialog.RestoreDirectory = true;
+                    try
+                    {
+                        dialog.Filter = string.IsNullOrWhiteSpace(filter)
+                            ? "All Files (*.*)|*.*"
+                            : filter;
+                    }
+                    catch (ArgumentException)
+                    {
+                        dialog.Filter = "All Files (*.*)|*.*";
+                    }
+
+                    DialogResult result = dialog.ShowDialog(this);
+                    if (runner != null)
+                    {
+                        runner.SendInput(result == DialogResult.OK ? dialog.FileName : "");
                     }
                 }
             });
