@@ -47,6 +47,16 @@ jobs:
             throw "PowerShell syntax validation failed."
           }
 
+      - name: Validate UI host syntax
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile('.\ui\PowerShellHost.ps1', [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            throw "UI host syntax validation failed: $($errors[0].Message)"
+          }
+
       - name: Build native Windows installer
         shell: powershell
         env:
