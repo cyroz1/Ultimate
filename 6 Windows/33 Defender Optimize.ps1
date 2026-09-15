@@ -169,7 +169,7 @@ shutdown -r -t 00
 Set-Content -Path "$env:SystemRoot\Temp\defenderoptimize.ps1" -Value $DefenderOptimize -Force
 
 # install runonce defenderoptimize ps1 file to run in safe boot
-cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*defenderoptimize`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\defenderoptimize.ps1`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*defenderoptimize`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Hidden -f $env:SystemRoot\Temp\defenderoptimize.ps1`" /f >nul 2>&1"
 
 # smartscreen for microsoft edge - needs normal boot as admin
 cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Edge\SmartScreenEnabled`" /ve /t REG_DWORD /d `"0`" /f >nul 2>&1"
@@ -344,7 +344,7 @@ shutdown -r -t 00
 Set-Content -Path "$env:SystemRoot\Temp\defenderdefault.ps1" -Value $DefenderDefault -Force
 
 # install runonce defenderdefault ps1 file to run in safe boot
-cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*defenderdefault`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\defenderdefault.ps1`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*defenderdefault`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Hidden -f $env:SystemRoot\Temp\defenderdefault.ps1`" /f >nul 2>&1"
 
 # smartscreen for microsoft edge - needs normal boot as admin
 cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Edge\SmartScreenEnabled`" /ve /t REG_DWORD /d `"1`" /f >nul 2>&1"

@@ -1,0 +1,68 @@
+name: Build and release Ultimate UI
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example 0.1.0"
+        required: true
+        default: "0.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Validate PowerShell syntax
+        shell: powershell
+        run: |
+          $parseErrors = @()
+          Get-ChildItem -Path . -Filter *.ps1 -File -Recurse |
+            Where-Object { $_.FullName -notmatch '[\\/]ui[\\/]' -and $_.FullName -notmatch '[\\/]build[\\/]' } |
+            ForEach-Object {
+              $tokens = $null
+              $errors = $null
+              [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+              if ($errors.Count -gt 0) {
+                $parseErrors += "$( $_.FullName ): $($errors[0].Message)"
+              }
+            }
+          if ($parseErrors.Count -gt 0) {
+            $parseErrors | ForEach-Object { Write-Error $_ }
+            throw "PowerShell syntax validation failed."
+          }
+
+      - name: Build portable Windows package
+        shell: powershell
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF_VERSION: ${{ github.ref_name }}
+        run: |
+          $version = $env:INPUT_VERSION
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = $env:REF_VERSION -replace '^v', ''
+          }
+          .\build\build.ps1 -Version $version
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ultimate-UI
+          path: dist/*.zip
+
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $asset = Get-ChildItem .\dist\*.zip | Select-Object -First 1
+          gh release create $env:GITHUB_REF_NAME $asset.FullName --repo $env:GITHUB_REPOSITORY --generate-notes

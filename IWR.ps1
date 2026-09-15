@@ -1,13 +1,13 @@
 # admin
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
-{Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+{Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
 Exit}
 
 # silent
 $progresspreference = 'silentlycontinue'
 
 # download
-iwr "https://github.com/FR33THYFR33THY/Ultimate/archive/refs/heads/main.zip" -OutFile "$env:SystemRoot\Temp\Ultimate.zip"
+iwr "https://github.com/cyroz1/Ultimate/archive/refs/heads/main.zip" -OutFile "$env:SystemRoot\Temp\Ultimate.zip"
 
 # extract
 Expand-Archive -Path "$env:SystemRoot\Temp\Ultimate.zip" -DestinationPath "$env:SystemRoot\Temp\Ultimate" -Force

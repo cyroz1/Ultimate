@@ -42,7 +42,7 @@ switch ($priochoice) {
 "6" {$prio = "Idle"}
 default {
 Write-Host "Invalid input..." -ForegroundColor Red
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Pause
 exit
 }
 }
@@ -105,7 +105,7 @@ switch ($priochoice) {
 "6" {$prio = "Idle"}
 default {
 Write-Host "Invalid input..." -ForegroundColor Red
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Pause
 exit
 }
 }

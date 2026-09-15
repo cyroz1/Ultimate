@@ -107,7 +107,7 @@ Start-Process "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\D
 Set-Content -Path "$env:SystemRoot\Temp\ddu.ps1" -Value $DDU -Force
 
 # install runonce ddu ps1 file to run in safe boot
-cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*ddu`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\ddu.ps1`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*ddu`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Hidden -f $env:SystemRoot\Temp\ddu.ps1`" /f >nul 2>&1"
 
 # turn on safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -204,7 +204,7 @@ Start-Process -Wait "$env:SystemDrive\Program Files (x86)\Display Driver Uninsta
 Set-Content -Path "$env:SystemRoot\Temp\ddumanual.ps1" -Value $DDU -Force
 
 # install runonce ddumanual ps1 file to run in safe boot
-cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*ddumanual`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\ddumanual.ps1`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"*ddumanual`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Hidden -f $env:SystemRoot\Temp\ddumanual.ps1`" /f >nul 2>&1"
 
 # turn on safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
