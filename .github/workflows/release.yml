@@ -21,6 +21,13 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Install WiX Toolset
+        shell: powershell
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix --version
+
       - name: Validate PowerShell syntax
         shell: powershell
         run: |
@@ -40,7 +47,7 @@ jobs:
             throw "PowerShell syntax validation failed."
           }
 
-      - name: Build portable Windows package
+      - name: Build native Windows installer
         shell: powershell
         env:
           INPUT_VERSION: ${{ github.event.inputs.version }}
@@ -52,11 +59,11 @@ jobs:
           }
           .\build\build.ps1 -Version $version
 
-      - name: Upload build artifact
+      - name: Upload MSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ultimate-UI
-          path: dist/*.zip
+          name: Ultimate-UI-installer
+          path: dist/*.msi
 
       - name: Publish tagged release
         if: startsWith(github.ref, 'refs/tags/')
@@ -64,5 +71,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $asset = Get-ChildItem .\dist\*.zip | Select-Object -First 1
+          $asset = Get-ChildItem .\dist\*.msi | Select-Object -First 1
           gh release create $env:GITHUB_REF_NAME $asset.FullName --repo $env:GITHUB_REPOSITORY --generate-notes

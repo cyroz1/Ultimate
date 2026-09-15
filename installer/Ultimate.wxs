@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package
+    Name="Ultimate"
+    Manufacturer="cyroz1"
+    Version="$(var.ProductVersion)"
+    Language="1033"
+    Scope="perMachine"
+    InstallerVersion="500"
+    UpgradeCode="{6D8EEA4B-0A7A-4D1E-B39F-06C5FC4A25F7}">
+
+    <SummaryInformation
+      Description="Native Windows UI for the Ultimate PowerShell toolkit"
+      Keywords="Ultimate, PowerShell, Windows toolkit" />
+
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of Ultimate is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <Property
+      Id="WIXUI_EXITDIALOGOPTIONALTEXT"
+      Value="Ultimate has been installed. Launch it from the Start menu." />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/cyroz1/Ultimate" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/cyroz1/Ultimate/issues" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <Feature Id="MainFeature" Title="Ultimate" Level="1">
+      <ComponentGroupRef Id="ProgramFilesComponents" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Ultimate" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Ultimate" />
+    </StandardDirectory>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="StartMenuShortcut" Guid="{E0D672F8-9CB5-42E0-A96F-C36E19A1D0FE}">
+        <Shortcut
+          Id="UltimateStartMenuShortcut"
+          Name="Ultimate"
+          Description="Open the native Ultimate Windows toolkit UI"
+          Target="[INSTALLFOLDER]UltimateUI.exe"
+          WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\cyroz1\Ultimate"
+          Name="Installed"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <ComponentGroup Id="ProgramFilesComponents" Directory="INSTALLFOLDER">
+      <Files Include="$(var.StageDir)\**" />
+    </ComponentGroup>
+  </Package>
+</Wix>

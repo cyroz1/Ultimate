@@ -13,17 +13,22 @@ The application requests administrator rights because the original scripts chang
 
 ### Download
 
-Download the latest `Ultimate-UI-v*-win-x64.zip` from the fork's [Releases](../../releases) page, extract it, and launch `UltimateUI.exe`.
+Download and run the latest `Ultimate-UI-v*-win-x64.msi` from the fork's [Releases](../../releases) page. The installer places the toolkit under Program Files, adds an Ultimate shortcut to the Start menu, and registers normal Windows uninstall/upgrade support.
 
 ### Build on Windows
 
-The build uses the .NET Framework C# compiler already included with supported Windows installations:
+The build uses the .NET Framework C# compiler already included with supported Windows installations and WiX Toolset 5.0.2 for the MSI:
 
 ```powershell
-.\build\build.ps1 -Version 0.1.0
+dotnet tool install --global wix --version 5.0.2
+wix extension add -g WixToolset.UI.wixext/5.0.2
 ```
 
-The portable ZIP is written to `dist\Ultimate-UI-v0.1.0-win-x64.zip`. Pushing a `v*` tag runs the Windows build and publishes the ZIP as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
+```powershell
+.\build\build.ps1 -Version 0.1.2
+```
+
+The native MSI is written to `dist\Ultimate-UI-v0.1.2-win-x64.msi`. Pushing a `v*` tag runs the Windows build and publishes the MSI as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
 
 # Requirements
 - Windows 10/11 Home/Pro/LTSC/IoT/Server

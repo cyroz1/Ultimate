@@ -6,8 +6,20 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $distRoot = Join-Path $repoRoot "dist"
 $stageRoot = Join-Path $distRoot "Ultimate-UI"
-$archiveName = "Ultimate-UI-v$Version-win-x64.zip"
-$archivePath = Join-Path $distRoot $archiveName
+$versionText = ($Version -replace '^v', '').Trim()
+if ($versionText -notmatch '^\d+(\.\d+){0,3}$') {
+    throw "Version must contain only numeric components, for example 0.1.2."
+}
+$versionParts = @($versionText.Split('.'))
+while ($versionParts.Count -lt 3) {
+    $versionParts += '0'
+}
+if ($versionParts.Count -eq 3) {
+    $versionParts += '0'
+}
+$installerVersion = $versionParts -join '.'
+$installerName = "Ultimate-UI-v$versionText-win-x64.msi"
+$installerPath = Join-Path $distRoot $installerName
 
 if (Test-Path $distRoot) {
     Remove-Item -Path $distRoot -Recurse -Force
@@ -57,7 +69,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $itemsToCopy = @(
     "1 Check", "2 Refresh", "3 Setup", "4 Installers", "5 Graphics", "6 Windows", "7 Hardware", "8 Advanced",
-    "IWR.ps1", "README.md", "LICENSE"
+    "AllowScripts.cmd", "IWR.ps1", "README.md", "LICENSE"
 )
 foreach ($item in $itemsToCopy) {
     $source = Join-Path $repoRoot $item
@@ -68,5 +80,24 @@ foreach ($item in $itemsToCopy) {
 New-Item -Path (Join-Path $stageRoot "ui") -ItemType Directory -Force | Out-Null
 Copy-Item -Path (Join-Path $repoRoot "ui\PowerShellHost.ps1") -Destination (Join-Path $stageRoot "ui\PowerShellHost.ps1") -Force
 
-Compress-Archive -Path (Join-Path $stageRoot "*") -DestinationPath $archivePath -CompressionLevel Optimal
-Write-Output "Built $archivePath"
+$wix = Get-Command wix -ErrorAction SilentlyContinue
+if (-not $wix) {
+    throw "WiX was not found. Install WiX 5.0.2 with 'dotnet tool install --global wix --version 5.0.2', then add WixToolset.UI.wixext/5.0.2 to the WiX extension cache."
+}
+
+$wixSource = Join-Path $repoRoot "installer\Ultimate.wxs"
+$wixArguments = @(
+    "build",
+    "-arch", "x64",
+    "-ext", "WixToolset.UI.wixext",
+    "-d", "ProductVersion=$installerVersion",
+    "-d", "StageDir=$stageRoot",
+    "-o", $installerPath,
+    $wixSource
+)
+& $wix.Source @wixArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "WiX MSI compilation failed with exit code $LASTEXITCODE."
+}
+
+Write-Output "Built $installerPath"
