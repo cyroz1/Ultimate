@@ -24,8 +24,6 @@
       Value="Ultimate has been installed. Launch it from the Start menu." />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/cyroz1/Ultimate" />
     <Property Id="ARPHELPLINK" Value="https://github.com/cyroz1/Ultimate/issues" />
-    <Property Id="ARPNOMODIFY" Value="1" />
-
     <Feature Id="MainFeature" Title="Ultimate" Level="1">
       <ComponentGroupRef Id="ProgramFilesComponents" />
       <ComponentRef Id="StartMenuShortcut" />
