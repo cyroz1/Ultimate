@@ -27,10 +27,10 @@ wix extension add -g WixToolset.UI.wixext/5.0.2
 ```
 
 ```powershell
-.\build\build.ps1 -Version 0.1.2
+.\build\build.ps1 -Version 0.1.4
 ```
 
-The native MSI is written to `dist\Ultimate-UI-v0.1.2-win-x64.msi`. Pushing a `v*` tag runs the Windows build and publishes the MSI as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
+The native MSI is written to `dist\Ultimate-UI-v0.1.4-win-x64.msi`. Pushing a `v*` tag runs the Windows build and publishes the MSI as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
 
 # Requirements
 - Windows 10/11 Home/Pro/LTSC/IoT/Server

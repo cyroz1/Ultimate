@@ -27,6 +27,13 @@ namespace UltimateUi
         public string Placeholder;
     }
 
+    internal sealed class GuideEntry
+    {
+        public string RelativePath;
+        public string Scope;
+        public string Description;
+    }
+
     internal sealed class ScriptDefinition
     {
         public string FullPath;
@@ -34,6 +41,7 @@ namespace UltimateUi
         public string Category;
         public string CategoryKey;
         public string Title;
+        public string Scope;
         public string Description;
         public string Warning;
         public bool NeedsConfirmation;
@@ -306,6 +314,7 @@ namespace UltimateUi
 
         private readonly string root;
         private readonly string hostPath;
+        private readonly List<GuideEntry> guideEntries;
         private readonly List<ScriptDefinition> scripts;
         private readonly List<ScriptDefinition> visibleScripts = new List<ScriptDefinition>();
         private readonly Dictionary<string, Control> inputControls = new Dictionary<string, Control>();
@@ -333,6 +342,7 @@ namespace UltimateUi
         {
             root = appRoot;
             hostPath = Path.Combine(root, "ui", "PowerShellHost.ps1");
+            guideEntries = LoadGuideEntries();
             scripts = LoadScripts();
 
             Text = "Ultimate — Windows Toolkit";
@@ -499,7 +509,7 @@ namespace UltimateUi
                 BackColor = Background,
                 Padding = new Padding(14, 10, 10, 10)
             };
-            details.RowStyles.Add(new RowStyle(SizeType.Absolute, 128));
+            details.RowStyles.Add(new RowStyle(SizeType.Absolute, 154));
             details.RowStyles.Add(new RowStyle(SizeType.Absolute, 230));
             details.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
             details.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -519,7 +529,8 @@ namespace UltimateUi
                 Text = "",
                 AutoSize = false,
                 Location = new Point(0, 38),
-                Size = new Size(850, 24),
+                Size = new Size(900, 24),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 ForeColor = Accent,
                 Font = new Font("Segoe UI", 9F)
             };
@@ -528,15 +539,17 @@ namespace UltimateUi
                 Text = "Select an item from the library to see its options.",
                 AutoSize = false,
                 Location = new Point(0, 67),
-                Size = new Size(900, 34),
+                Size = new Size(900, 52),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 ForeColor = Muted
             };
             warningLabel = new Label
             {
                 Text = "",
                 AutoSize = false,
-                Location = new Point(0, 103),
+                Location = new Point(0, 125),
                 Size = new Size(900, 24),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 ForeColor = Warning,
                 Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold)
             };
@@ -737,7 +750,9 @@ namespace UltimateUi
                 bool categoryMatches = categoryKey == "*" || script.CategoryKey == categoryKey;
                 bool queryMatches = query.Length == 0 ||
                                     script.Title.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                    script.RelativePath.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
+                                    script.RelativePath.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                    script.Scope.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                    script.Description.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
                 if (categoryMatches && queryMatches)
                 {
                     visibleScripts.Add(script);
@@ -781,7 +796,7 @@ namespace UltimateUi
 
             currentScript = selected;
             titleLabel.Text = selected.Title;
-            metaLabel.Text = selected.Category + "   ·   " + selected.RelativePath;
+            metaLabel.Text = selected.Category + "   ·   " + selected.RelativePath + "   ·   Scope: " + selected.Scope;
             descriptionLabel.Text = selected.Description;
             warningLabel.Text = selected.Warning;
             warningLabel.ForeColor = selected.NeedsConfirmation ? Warning : Muted;
@@ -1223,9 +1238,56 @@ namespace UltimateUi
             base.OnFormClosing(e);
         }
 
+        private List<GuideEntry> LoadGuideEntries()
+        {
+            List<GuideEntry> result = new List<GuideEntry>();
+            string guidePath = Path.Combine(root, "SCRIPT_GUIDE.md");
+            if (!File.Exists(guidePath))
+            {
+                return result;
+            }
+
+            try
+            {
+                foreach (string line in File.ReadAllLines(guidePath))
+                {
+                    Match match = Regex.Match(line,
+                        @"^\|\s*\[([^\]]+)\]\(<([^>]+)>\)\s*\|\s*([^|]+?)\s*\|\s*(.*?)\s*\|$");
+                    if (!match.Success)
+                    {
+                        continue;
+                    }
+
+                    result.Add(new GuideEntry
+                    {
+                        RelativePath = match.Groups[2].Value.Replace('\\', '/'),
+                        Scope = match.Groups[3].Value.Trim(),
+                        Description = match.Groups[4].Value.Trim()
+                    });
+                }
+            }
+            catch
+            {
+                return new List<GuideEntry>();
+            }
+
+            result.Sort(delegate(GuideEntry left, GuideEntry right)
+            {
+                return string.Compare(left.RelativePath, right.RelativePath, StringComparison.OrdinalIgnoreCase);
+            });
+            return result;
+        }
+
         private List<ScriptDefinition> LoadScripts()
         {
             List<ScriptDefinition> result = new List<ScriptDefinition>();
+            Dictionary<string, GuideEntry> guideByPath =
+                new Dictionary<string, GuideEntry>(StringComparer.OrdinalIgnoreCase);
+            foreach (GuideEntry entry in guideEntries)
+            {
+                guideByPath[entry.RelativePath] = entry;
+            }
+
             string[] paths = Directory.GetFiles(root, "*.ps1", SearchOption.AllDirectories);
             foreach (string path in paths)
             {
@@ -1245,6 +1307,15 @@ namespace UltimateUi
 
                 string fileTitle = Path.GetFileNameWithoutExtension(path);
                 fileTitle = Regex.Replace(fileTitle, @"^\d+\s+", "");
+                GuideEntry guide;
+                string description = MakeDescription(normalized, fileTitle);
+                string scope = "Not documented";
+                if (guideByPath.TryGetValue(normalized, out guide))
+                {
+                    description = guide.Description;
+                    scope = guide.Scope;
+                }
+
                 ScriptDefinition definition = new ScriptDefinition
                 {
                     FullPath = path,
@@ -1252,7 +1323,8 @@ namespace UltimateUi
                     Category = category,
                     CategoryKey = categoryKey,
                     Title = fileTitle,
-                    Description = MakeDescription(normalized, fileTitle),
+                    Scope = scope,
+                    Description = description,
                     Warning = MakeWarning(normalized),
                     NeedsConfirmation = !IsInformational(normalized)
                 };
