@@ -18,10 +18,11 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-# download and install 7-zip
-try {
-Start-Process "winget" -ArgumentList "install `"7zip.7zip`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download 7zip
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
+
+# install 7zip
+Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
 
 # set config for 7zip
 cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
@@ -30,14 +31,6 @@ cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`"
 # cleaner start menu shortcut path
 Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
 Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-
-# create desktop shortcut
-$WshShell = New-Object -comObject WScript.Shell
-$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
-$Shortcut = $WshShell.CreateShortcut("$Desktop\7-Zip File Manager.lnk")
-$Shortcut.TargetPath = "$env:SystemDrive\Program Files\7-Zip\7zFM.exe"
-$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files\7-Zip"
-$Shortcut.Save()
 
         # FUNCTION SHOW-MENU
         function show-menu {
@@ -119,10 +112,11 @@ Remove-Item "$env:SystemRoot\Temp\nvidiadriver\NvApp\NvConfigGenerator.dll" -For
 # install nvidia driver
 Start-Process "$env:SystemRoot\Temp\nvidiadriver\setup.exe" -ArgumentList "-s -noreboot -noeula -clean" -Wait -NoNewWindow
 
+# download nvidia control panel
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/nvp.appx" -OutFile "$env:SystemRoot\Temp\nvp.appx"
+
 # install nvidia control panel
-try {
-Start-Process "winget" -ArgumentList "install `"9NF8H0H7WMLT`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+Add-AppxPackage -Path "$env:SystemRoot\Temp\nvp.appx" -ErrorAction SilentlyContinue | Out-Null
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
@@ -183,29 +177,25 @@ cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"Ena
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# remove winget app from install entry to force upgrade/install/fix
-try {
-Start-Process "winget" -ArgumentList "uninstall --product-code Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-} catch { }
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# download and install nvidia profile inspector
-try {
-Start-Process "winget" -ArgumentList "install `"Orbmu2k.nvidiaProfileInspector`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download nvidia profile inspector
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/inspector.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
 $Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector"
 $Shortcut.Save()
 
 # create start menu shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector"
 $Shortcut.Save()
 
 # set config for inspector
@@ -409,7 +399,7 @@ $nipfile = @'
 Set-Content -Path "$env:SystemRoot\Temp\inspector.nip" -Value $nipfile -Force
 
 # import nip
-Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
+Start-Process -Wait "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\inspector.nip"
 
         break MainLoop
 
@@ -801,7 +791,7 @@ cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\I
 }
 
 # show all hidden taskbar icons
-        ## ms-settings:taskbar
+## ms-settings:taskbar
 $notifyiconsettings = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
 foreach ($setreg in $notifyiconsettings) {
 if ((Get-ItemProperty -Path "registry::$setreg").IsPromoted -eq 0) {

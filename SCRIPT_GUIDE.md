@@ -1,6 +1,6 @@
 # Ultimate Script Guide
 
-This is a brief reference for the scripts shipped with Ultimate. It covers all 101 original toolkit scripts, the original bootstrap/helper script, and the native UI/build support scripts added by this fork.
+This is a brief reference for the scripts shipped with Ultimate. It covers all 104 numbered toolkit scripts, the two bootstrap/helper scripts, and the native UI/build support scripts added by this fork.
 
 Descriptions are high-level summaries of the behavior in each script. Many scripts require administrator rights, an internet connection, or a restart, and some intentionally open Windows Settings, a browser, an installer, or another graphical tool. The original toolkit scripts are unchanged.
 
@@ -18,8 +18,12 @@ The Scope column describes direct effects of the script itself:
 
 | Script | Scope | What it does |
 | --- | --- | --- |
-| [1 Bios.ps1](<1 Check/1 Bios.ps1>) | System | Reads the motherboard details, opens a web search, displays BIOS tuning guidance for Intel and AMD systems, and can restart into firmware settings. |
-| [2 PC.ps1](<1 Check/2 PC.ps1>) | Both | Installs or opens OCCT and displays a basic PC stability-testing and troubleshooting checklist. |
+| [1 Bios Check.ps1](<1 Check/1 Bios Check.ps1>) | System | Reads the motherboard details, opens a web search, displays BIOS tuning guidance for Intel and AMD systems, and can restart into firmware settings. |
+| [2 Storage Check.ps1](<1 Check/2 Storage Check.ps1>) | None / external | Reports free space on local drives, opens This PC in File Explorer, and displays storage guidance. |
+| [3 Ram Check.ps1](<1 Check/3 Ram Check.ps1>) | None / external | Downloads and opens CPU-Z, then displays RAM profile, slot, module-matching, and dual-channel guidance. |
+| [4 Gpu Check.ps1](<1 Check/4 Gpu Check.ps1>) | None / external | Downloads and opens GPU-Z, then displays graphics-bus, Resizable BAR, cabling, and PCIe-slot guidance. |
+| [5 Storage Ram Cpu Test & Bench.ps1](<1 Check/5 Storage Ram Cpu Test & Bench.ps1>) | None / external | Downloads and opens OCCT, then displays storage, RAM, and CPU stress-test, troubleshooting, and benchmark guidance. |
+| [6 Gpu Test & Bench.ps1](<1 Check/6 Gpu Test & Bench.ps1>) | None / external | Downloads and opens FurMark, then displays GPU stress-test, troubleshooting, and benchmark guidance. |
 
 ## 2 Refresh
 

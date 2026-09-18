@@ -28,10 +28,25 @@
 
         Clear-Host
 
-# install ddu
-try {
-Start-Process "winget" -ArgumentList "install `"Wagnardsoft.DisplayDriverUninstaller`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download 7zip
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
+
+# install 7zip
+Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
+
+# set config for 7zip
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# cleaner start menu shortcut path
+Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+# download ddu
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/ddu.exe" -OutFile "$env:SystemRoot\Temp\ddu.exe"
+
+# extract ddu with 7zip
+& "$env:SystemDrive\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\ddu.exe" -o"$env:SystemRoot\Temp\ddu" -y | Out-Null
 
 # set config for ddu
 $DduConfig = @'
@@ -72,17 +87,13 @@ $DduConfig = @'
 	</Settings>
 </DisplayDriverUninstaller>
 '@
-Set-Content -Path "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\Settings\Settings.xml" -Value $DduConfig -Force
+Set-Content -Path "$env:SystemRoot\Temp\ddu\Settings\Settings.xml" -Value $DduConfig -Force
 
 # set ddu config to read only
-Set-ItemProperty -Path "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\Settings\Settings.xml" -Name IsReadOnly -Value $true
+Set-ItemProperty -Path "$env:SystemRoot\Temp\ddu\Settings\Settings.xml" -Name IsReadOnly -Value $true
 
 # prevent downloads of drivers from windows update
 cmd /c "reg add `"HKLM\Software\Microsoft\Windows\CurrentVersion\DriverSearching`" /v `"SearchOrderConfig`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-
-# cleaner ddu start menu shortcut path
-Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Display Driver Uninstaller\Display Driver Uninstaller.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Display Driver Uninstaller" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 
 # create ddu ps1 file
 $DDU = @'
@@ -102,7 +113,7 @@ cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
 Write-Host "DDU & RESTARTING`n" -ForegroundColor Red
 
 # uninstall soundblaster realtek intel amd nvidia drivers & restart
-Start-Process "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\Display Driver Uninstaller.exe" -ArgumentList "-CleanSoundBlaster -CleanRealtek -CleanAllGpus -Restart" -Wait
+Start-Process "$env:SystemRoot\Temp\ddu\Display Driver Uninstaller.exe" -ArgumentList "-CleanSoundBlaster -CleanRealtek -CleanAllGpus -Restart" -Wait
 '@
 Set-Content -Path "$env:SystemRoot\Temp\ddu.ps1" -Value $DDU -Force
 
@@ -125,10 +136,25 @@ exit
 
         Clear-Host
 
-# install ddu
-try {
-Start-Process "winget" -ArgumentList "install `"Wagnardsoft.DisplayDriverUninstaller`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download 7zip
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
+
+# install 7zip
+Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
+
+# set config for 7zip
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
+cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# cleaner start menu shortcut path
+Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+# download ddu
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/ddu.exe" -OutFile "$env:SystemRoot\Temp\ddu.exe"
+
+# extract ddu with 7zip
+& "$env:SystemDrive\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\ddu.exe" -o"$env:SystemRoot\Temp\ddu" -y | Out-Null
 
 # set config for ddu
 $DduConfig = @'
@@ -169,17 +195,13 @@ $DduConfig = @'
 	</Settings>
 </DisplayDriverUninstaller>
 '@
-Set-Content -Path "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\Settings\Settings.xml" -Value $DduConfig -Force
+Set-Content -Path "$env:SystemRoot\Temp\ddu\Settings\Settings.xml" -Value $DduConfig -Force
 
 # set ddu config to read only
-Set-ItemProperty -Path "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\Settings\Settings.xml" -Name IsReadOnly -Value $true
+Set-ItemProperty -Path "$env:SystemRoot\Temp\ddu\Settings\Settings.xml" -Name IsReadOnly -Value $true
 
 # prevent downloads of drivers from windows update
 cmd /c "reg add `"HKLM\Software\Microsoft\Windows\CurrentVersion\DriverSearching`" /v `"SearchOrderConfig`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-
-# cleaner ddu start menu shortcut path
-Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Display Driver Uninstaller\Display Driver Uninstaller.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Display Driver Uninstaller" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 
 # create ddumanual ps1 file
 $DDU = @'
@@ -199,7 +221,7 @@ cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
 Write-Host "DDU MANUAL`n"
 
 # open ddu
-Start-Process -Wait "$env:SystemDrive\Program Files (x86)\Display Driver Uninstaller\Display Driver Uninstaller.exe"
+Start-Process -Wait "$env:SystemRoot\Temp\ddu\Display Driver Uninstaller.exe"
 '@
 Set-Content -Path "$env:SystemRoot\Temp\ddumanual.ps1" -Value $DDU -Force
 

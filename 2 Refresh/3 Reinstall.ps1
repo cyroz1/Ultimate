@@ -30,18 +30,11 @@ Clear-Host
 
 Write-Host "Downloading: Media Creation Tool Win 10..."
 
-# remove winget app from install entry to force upgrade/install/fix
-try {
-Start-Process "winget" -ArgumentList "uninstall --product-code Microsoft.MediaCreationTool.Windows10_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-} catch { }
-
 # download media creation tool win 10
-try {
-Start-Process "winget" -ArgumentList "install `"Microsoft.MediaCreationTool.Windows10`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/mediacreationtoolw10.exe" -OutFile "$env:SystemRoot\Temp\mediacreationtoolw10.exe"
 
 # start media creation tool win 10
-Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.MediaCreationTool.Windows10_Microsoft.Winget.Source_8wekyb3d8bbwe\MediaCreationTool10.exe"
+Start-Process "$env:SystemRoot\Temp\mediacreationtoolw10.exe"
 
 exit
 
@@ -52,18 +45,11 @@ Clear-Host
 
 Write-Host "Downloading: Media Creation Tool Win 11..."
 
-# remove winget app from install entry to force upgrade/install/fix
-try {
-Start-Process "winget" -ArgumentList "uninstall --product-code Microsoft.MediaCreationTool_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-} catch { }
-
 # download media creation tool win 11
-try {
-Start-Process "winget" -ArgumentList "install `"Microsoft.MediaCreationTool`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/mediacreationtoolw11.exe" -OutFile "$env:SystemRoot\Temp\mediacreationtoolw11.exe"
 
 # start media creation tool win 11
-Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.MediaCreationTool_Microsoft.Winget.Source_8wekyb3d8bbwe\MediaCreationTool.exe"
+Start-Process "$env:SystemRoot\Temp\mediacreationtoolw11.exe"
 
 exit
 

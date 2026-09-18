@@ -18,30 +18,26 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-        # remove winget app from install entry to force upgrade/install/fix
-        try {
-        Start-Process "winget" -ArgumentList "uninstall --product-code Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-        } catch { }
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-        # download and install nvidia profile inspector
-        try {
-        Start-Process "winget" -ArgumentList "install `"Orbmu2k.nvidiaProfileInspector`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-        } catch { }
+# download nvidia profile inspector
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/inspector.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
 
-        # create desktop shortcut
-        $WshShell = New-Object -comObject WScript.Shell
-        $Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
-        $Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
-        $Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
-        $Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
-        $Shortcut.Save()
+# create desktop shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
+$Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector"
+$Shortcut.Save()
 
-        # create start menu shortcut
-        $WshShell = New-Object -comObject WScript.Shell
-        $Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
-        $Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
-        $Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
-        $Shortcut.Save()
+# create start menu shortcut
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector"
+$Shortcut.Save()
 
         Write-Host "SOME GAMES NEED TO BE SET IN THEIR INDIVIDUAL PROFILE`n"
         Write-Host "NVIDIA RESIZABLE BAR FORCE:`n"
@@ -261,11 +257,11 @@ $DefaultNip = @'
 '@
 Set-Content -Path "$env:SystemRoot\Temp\default.nip" -Value $DefaultNip -Force
 
-# import nip (rebar setting only)
-Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\default.nip"
+# import nip
+Start-Process -Wait "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\default.nip"
 
 # open inspector
-Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+Start-Process "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
 
 exit
 
@@ -299,10 +295,10 @@ $ForceOnNip = @'
 Set-Content -Path "$env:SystemRoot\Temp\forceon.nip" -Value $ForceOnNip -Force
 
 # import nip (rebar setting only)
-Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -mergeImport -silent $env:SystemRoot\Temp\forceon.nip"
+Start-Process -Wait "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe" -ArgumentList "-silentImport -mergeImport -silent $env:SystemRoot\Temp\forceon.nip"
 
 # open inspector
-Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+Start-Process "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
 
 exit
 
@@ -336,10 +332,10 @@ $ForceOffNip = @'
 Set-Content -Path "$env:SystemRoot\Temp\forceoff.nip" -Value $ForceOffNip -Force
 
 # import nip (rebar setting only)
-Start-Process -wait "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -mergeImport -silent $env:SystemRoot\Temp\forceoff.nip"
+Start-Process -Wait "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe" -ArgumentList "-silentImport -mergeImport -silent $env:SystemRoot\Temp\forceoff.nip"
 
 # open inspector
-Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
+Start-Process "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
 
 exit
 

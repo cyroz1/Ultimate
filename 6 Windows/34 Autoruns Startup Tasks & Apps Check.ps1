@@ -38,6 +38,8 @@
   		}
         }
 
+Write-Host "Downloading: Autoruns..."
+
 # create a restore point
 try {
 cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore`" /v `"SystemRestorePointCreationFrequency`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
@@ -45,8 +47,6 @@ Enable-ComputerRestore -Drive "C:\" -ErrorAction SilentlyContinue | Out-Null
 Checkpoint-Computer -Description "beforeautoruns" -RestorePointType "MODIFY_SETTINGS" -ErrorAction SilentlyContinue | Out-Null
 cmd /c "reg delete `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore`" /v `"SystemRestorePointCreationFrequency`" /f >nul 2>&1"
 } catch { }
-
-Write-Host "Downloading: Autoruns..."
 
 # remove 3rd party startup apps
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\RunNotification`" /f >nul 2>&1"
@@ -79,30 +79,26 @@ Get-ChildItem $tasksPath | Where-Object { $_.Name -ne "Microsoft" } | ForEach-Ob
 Remove-Item $_.FullName -Recurse -Force
 }
 
-# remove winget app from install entry to force upgrade/install/fix
-try {
-Start-Process "winget" -ArgumentList "uninstall --product-code Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-} catch { }
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\Autoruns" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# download and install autoruns
-try {
-Start-Process "winget" -ArgumentList "install `"Microsoft.Sysinternals.Autoruns`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download autoruns
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/autoruns.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
 $Shortcut = $WshShell.CreateShortcut("$Desktop\Autoruns.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\Autoruns64.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Autoruns"
 $Shortcut.Save()
 
 # create start menu shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Autoruns.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\Autoruns64.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Autoruns"
 $Shortcut.Save()
 
-# start autoruns
-Start-Process "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\Autoruns64.exe"
+# open autoruns
+Start-Process "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"

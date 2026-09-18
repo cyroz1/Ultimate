@@ -138,20 +138,22 @@ $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "Micros
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 
-# download and install edge
-try {
-Start-Process "winget" -ArgumentList "install `"Microsoft.Edge`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download edge installer
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edge.exe" -OutFile "$env:SystemRoot\Temp\edge.exe"
+
+# start edge installer
+Start-Process -Wait "$env:SystemRoot\Temp\edge.exe"
 
 # stop edge running
 $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 
-# download and install edge webview
-try {
-Start-Process "winget" -ArgumentList "install `"Microsoft.EdgeWebView2Runtime`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download edge webview installer
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edgewebview.exe" -OutFile "$env:SystemRoot\Temp\edgewebview.exe"
+
+# start edge webview installer
+Start-Process -Wait "$env:SystemRoot\Temp\edgewebview.exe"
 
 # stop edge running
 $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"

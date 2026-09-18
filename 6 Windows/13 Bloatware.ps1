@@ -457,10 +457,10 @@ Clear-Host
 Write-Host "Installing: Remote Desktop Connection. Please wait..."
 
 # download remote desktop connection
-IWR "https://go.microsoft.com/fwlink/?linkid=2247659" -OutFile "$env:SystemRoot\Temp\RemoteDesktopConnection.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/remotedesktopconnection.exe" -OutFile "$env:SystemRoot\Temp\remotedesktopconnection.exe"
 
 # install remote desktop connection 
-cmd /c "$env:SystemRoot\Temp\RemoteDesktopConnection.exe >nul 2>&1"
+cmd /c "$env:SystemRoot\Temp\remotedesktopconnection.exe >nul 2>&1"
 
 show-menu
 
@@ -476,10 +476,10 @@ Write-Host "If installer fails on W10, restart PC and rerun script"
 Write-Host ""
 
 # download w10 snipping tool
-IWR "https://download.microsoft.com/download/f/4/e/f4e03465-34d1-49b6-af1a-2816ca4a2402/installers_signed/snippingtool_setup_x64.exe" -OutFile "$env:SystemRoot\Temp\SnippingTool.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/snippingtool.exe" -OutFile "$env:SystemRoot\Temp\snippingtool.exe"
 
 # install w10 snipping tool
-cmd /c "$env:SystemRoot\Temp\SnippingTool.exe >nul 2>&1"
+cmd /c "$env:SystemRoot\Temp\snippingtool.exe >nul 2>&1"
 
 # install w11 snipping tool
 Get-AppXPackage -AllUsers *Microsoft.ScreenSketch* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}

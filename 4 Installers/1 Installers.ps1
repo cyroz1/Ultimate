@@ -69,10 +69,11 @@ Clear-Host
 
 Write-Host "Installing: 7Zip..."
 
-# download and install 7-zip
-try {
-Start-Process "winget" -ArgumentList "install `"7zip.7zip`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download 7zip
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
+
+# install 7zip
+Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
 
 # set config for 7zip
 cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
@@ -98,15 +99,13 @@ show-menu
 Clear-Host
 
 Write-Host "Installing: Battle.net..."
+Write-Host "Close launcher when installer is finished"
 
-# download and install battle.net
-try {
-Start-Process "winget" -ArgumentList "install `"Blizzard.BattleNet`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade --location `"$env:SystemDrive\Program Files (x86)\Battle.net`"" -Wait -WindowStyle Hidden
-} catch { }
+# download battle.net
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/battlenet.exe" -OutFile "$env:SystemRoot\Temp\battlenet.exe"
 
-Start-Sleep -Seconds 10
-
-Get-Process -Name "getinstaller" -ErrorAction SilentlyContinue | Wait-Process -ErrorAction SilentlyContinue
+# install battle.net 
+Start-Process -Wait "$env:SystemRoot\Temp\battlenet.exe" -ArgumentList '--lang=enUS --installpath="C:\Program Files (x86)\Battle.net"'
 
 # remove logon battle.net
 cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run`" /v `"Battle.net`" /f >nul 2>&1"
@@ -139,10 +138,11 @@ Clear-Host
 
 Write-Host "Installing: Brave..."
 
-# download and install brave
-try {
-Start-Process "winget" -ArgumentList "install `"Brave.Brave`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download brave
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/brave.exe" -OutFile "$env:SystemRoot\Temp\brave.exe"
+
+# install brave
+Start-Process "$env:SystemRoot\Temp\brave.exe" -ArgumentList "--system-level" -Wait
 
 # install ublock origin
 cmd /c "reg add `"HKLM\SOFTWARE\Policies\BraveSoftware\Brave\ExtensionInstallForcelist`" /v `"1`" /t REG_SZ /d `"ddkjiahejlhfcafbddmgiahcphecmpfh;https://clients2.google.com/service/update2/crx`" /f >nul 2>&1"
@@ -153,12 +153,11 @@ cmd /c "reg add `"HKLM\SOFTWARE\Policies\BraveSoftware\Brave`" /v `"BackgroundMo
 cmd /c "reg add `"HKLM\SOFTWARE\Policies\BraveSoftware\Brave`" /v `"HighEfficiencyModeEnabled`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
 
 # remove logon brave
-$basePath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-Get-Item $basePath | ForEach-Object {
-foreach ($valueName in $_.GetValueNames()) {
-if ($valueName -like "*Brave*") {
-Remove-ItemProperty -Path $_.PsPath -Name $valueName -Force -ErrorAction SilentlyContinue
-}
+$basePath = "HKLM:\Software\Microsoft\Active Setup\Installed Components"
+Get-ChildItem $basePath | ForEach-Object {
+$val = (Get-ItemProperty $_.PsPath)."(default)"
+if ($val -like "*Brave*") {
+Remove-Item $_.PsPath -Force -ErrorAction SilentlyContinue
 }
 }
 
@@ -182,19 +181,18 @@ show-menu
 
 Clear-Host
 
-Write-Host "Installing: Custom Resolution Utility..."
+Write-Host "Installing:"
+Write-Host "- Custom Resolution Utility..."
+Write-Host "- Scaled Resolution Editor..."
+
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\CRUSRE" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
 # download custom resolution utility
-IWR "https://www.monitortests.com/download/cru/cru-1.5.3.zip" -OutFile "$env:SystemRoot\Temp\cru.zip"
-
-# extract file
-Expand-Archive -Path "$env:SystemRoot\Temp\cru.zip" -DestinationPath "$env:SystemDrive\Program Files (x86)\CRUSRE" -Force
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/cru.exe" -OutFile "$env:SystemDrive\Program Files (x86)\CRUSRE\CRU.exe"
 
 # download scaled resolution editor
-IWR "https://www.monitortests.com/download/sre/sre-1.0.zip" -OutFile "$env:SystemRoot\Temp\sre.zip"
-
-# extract file
-Expand-Archive -Path "$env:SystemRoot\Temp\sre.zip" -DestinationPath "$env:SystemDrive\Program Files (x86)\CRUSRE" -Force
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/sre.exe" -OutFile "$env:SystemDrive\Program Files (x86)\CRUSRE\SRE.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
@@ -252,10 +250,14 @@ $DiscordSettings = @'
 '@
 Set-Content -Path "$env:APPDATA\discord\settings.json" -Value $DiscordSettings -Force | Out-Null
 
-# download and install discord
-try {
-Start-Process "winget" -ArgumentList "install `"Discord.Discord`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# fix path for space in username
+$Global:tempDir = (([System.IO.Path]::GetTempPath())).trimend('\')
+
+# download discord
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/discord.exe" -OutFile "$tempDir\discord.exe"
+
+# install discord	
+Start-Process "$tempDir\discord.exe"
 
 Start-Sleep -Seconds 10
 
@@ -278,14 +280,11 @@ Clear-Host
 
 Write-Host "Installing: Electronic Arts..."
 
-# download and install electronic arts
-try {
-Start-Process "winget" -ArgumentList "install `"ElectronicArts.EADesktop`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download electronic arts
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/ea.exe" -OutFile "$env:SystemRoot\Temp\ea.exe"
 
-Start-Sleep -Seconds 10
-
-Get-Process -Name "EAappInstaller" -ErrorAction SilentlyContinue | Wait-Process -ErrorAction SilentlyContinue
+# install electronic arts
+Start-Process -Wait "$env:SystemRoot\Temp\ea.exe"
 
 # remove logon electronic arts
 cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run`" /v `"EADM`" /f >nul 2>&1"
@@ -304,10 +303,11 @@ Clear-Host
 
 Write-Host "Installing: Epic Games..."
 
-# download and install epic games
-try {
-Start-Process "winget" -ArgumentList "install `"EpicGames.EpicGamesLauncher`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download epic games
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/epic.msi" -OutFile "$env:SystemRoot\Temp\epic.msi"
+
+# install epic games
+Start-Process -Wait "$env:SystemRoot\Temp\epic.msi" -ArgumentList "/quiet"
 
 # remove logon epic games
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"EpicGamesLauncher`" /f >nul 2>&1"
@@ -322,10 +322,10 @@ Clear-Host
 Write-Host "Installing: Escape From Tarkov..."
 
 # download escape from tarkov
-IWR "https://launcher.escapefromtarkov.com/launcher/download" -OutFile "$env:SystemRoot\Temp\Escape From Tarkov.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/bsg.exe" -OutFile "$env:SystemRoot\Temp\bsg.exe"
 
 # install escape from tarkov
-Start-Process -Wait "$env:SystemRoot\Temp\Escape From Tarkov.exe" -ArgumentList "/VERYSILENT /NORESTART"
+Start-Process -Wait "$env:SystemRoot\Temp\bsg.exe" -ArgumentList "/VERYSILENT /NORESTART"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
@@ -348,10 +348,11 @@ Clear-Host
 
 Write-Host "Installing: Firefox..."
 
-# download and install firefox
-try {
-Start-Process "winget" -ArgumentList "install `"Mozilla.Firefox`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download firefox
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/firefox.exe" -OutFile "$env:SystemRoot\Temp\firefox.exe"
+
+# install firefox
+Start-Process -Wait "$env:SystemRoot\Temp\firefox.exe" -ArgumentList "/S"
 
 # uninstall mozilla maintenance service
 Start-Process -FilePath "C:\Program Files (x86)\Mozilla Maintenance Service\uninstall.exe" -ArgumentList "/S" -WindowStyle Hidden -Wait
@@ -405,10 +406,11 @@ Clear-Host
 
 Write-Host "Installing: Frame View..."
 
-# download and install frameview
-try {
-Start-Process "winget" -ArgumentList "install `"Nvidia.FrameView`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download frame view
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/frameview.exe" -OutFile "$env:SystemRoot\Temp\frameview.exe"
+
+# install frame view 
+Start-Process -Wait "$env:SystemRoot\Temp\frameview.exe" -ArgumentList "/s"
 
 # cleaner start menu shortcut path
 Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\NVIDIA FrameView\FrameView.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -422,11 +424,13 @@ show-menu
 Clear-Host
 
 Write-Host "Installing: GOG launcher..."
+Write-Host "Close launcher when installer is finished"
 
-# download and install gog launcher
-try {
-Start-Process "winget" -ArgumentList "install `"GOG.Galaxy`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download gog launcher
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/gog.exe" -OutFile "$env:SystemRoot\Temp\gog.exe"
+
+# install gog launcher
+Start-Process -Wait "$env:SystemRoot\Temp\gog.exe"
 
 # remove logon gog launcher
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"GalaxyClient`" /f >nul 2>&1"
@@ -445,10 +449,11 @@ Clear-Host
 
 Write-Host "Installing: Google Chrome..."
 
-# download and install google chrome
-try {
-Start-Process "winget" -ArgumentList "install `"Google.Chrome`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download google chrome
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/chrome.exe" -OutFile "$env:SystemRoot\Temp\chrome.exe"
+
+# install google chrome
+Start-Process -Wait "$env:SystemRoot\Temp\chrome.exe" -ArgumentList "--silent --install" -WindowStyle Hidden
 
 # install ublock origin lite
 cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist`" /v `"1`" /t REG_SZ /d `"ddkjiahejlhfcafbddmgiahcphecmpfh;https://clients2.google.com/service/update2/crx`" /f >nul 2>&1"
@@ -486,10 +491,11 @@ Clear-Host
 
 Write-Host "Installing: Helium..."
 
-# download and install helium
-try {
-Start-Process "winget" -ArgumentList "install `"ImputNet.Helium`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download helium
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/helium.exe" -OutFile "$env:SystemRoot\Temp\helium.exe"
+
+# install helium
+Start-Process -Wait "$env:SystemRoot\Temp\helium.exe" -ArgumentList "/S" -WindowStyle Hidden
 
 # add helium policies
 cmd /c "reg add `"HKLM\SOFTWARE\Policies\Helium`" /v `"HardwareAccelerationModeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
@@ -527,10 +533,15 @@ Clear-Host
 
 Write-Host "Installing: League Of Legends..."
 
-# download and install league of legends
-try {
-Start-Process "winget" -ArgumentList "install `"RiotGames.LeagueOfLegends.NA`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download league of legends
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/league.exe" -OutFile "$env:SystemRoot\Temp\league.exe"
+
+# install league of legends
+Start-Process "$env:SystemRoot\Temp\league.exe" -ArgumentList "--skip-to-install"
+
+Start-Sleep -Seconds 10
+
+Get-Process -Name "league" -ErrorAction SilentlyContinue | Wait-Process -ErrorAction SilentlyContinue
 
 # remove logon league of legends
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"RiotClient`" /f >nul 2>&1"
@@ -549,24 +560,24 @@ Clear-Host
 
 Write-Host "Installing: More Clock Tool..."
 
-# download more clock tool
-curl.exe -s -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://www.igorslab.de/installer/MoreClockTool_v1111_2.zip" -o "$env:SystemRoot\Temp\mct.zip"
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\More Clock Tool" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# extract file
-Expand-Archive -Path "$env:SystemRoot\Temp\mct.zip" -DestinationPath "$env:SystemDrive\Program Files (x86)\More Clock Tool" -Force
+# download more clock tool
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/moreclocktool.exe" -OutFile "$env:SystemDrive\Program Files (x86)\More Clock Tool\More Clock Tool.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
 $Shortcut = $WshShell.CreateShortcut("$Desktop\More Clock Tool.lnk")
-$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\More Clock Tool\MoreClockTool.exe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\More Clock Tool\More Clock Tool.exe"
 $Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\More Clock Tool"
 $Shortcut.Save()
 
 # create start menu shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\More Clock Tool.lnk")
-$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\More Clock Tool\MoreClockTool.exe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\More Clock Tool\More Clock Tool.exe"
 $Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\More Clock Tool"
 $Shortcut.Save()
 
@@ -579,12 +590,13 @@ Clear-Host
 
 Write-Host "Installing: Notepad ++..."
 
-# download and install notepad++
-try {
-Start-Process "winget" -ArgumentList "install `"Notepad++.Notepad++`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download notepad ++
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/notepad++.exe" -OutFile "$env:SystemRoot\Temp\notepad++.exe"
 
-# new notepad++ folder
+# install notepad ++
+Start-Process -Wait "$env:SystemRoot\Temp\notepad++.exe" -ArgumentList "/S"
+
+# new folder
 New-Item -Path "$env:AppData" -Name "Notepad++" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
 # create config for notepad ++
@@ -684,10 +696,11 @@ Clear-Host
 
 Write-Host "Installing: Nvidia App..."
 
-# download and install nvidia app
-try {
-Start-Process "winget" -ArgumentList "install `"XP8CLZL93F5Z4P`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download nvidia app
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/nvidiaapp.exe" -OutFile "$env:SystemRoot\Temp\nvidiaapp.exe"
+
+# install nvidia app
+Start-Process -Wait "$env:SystemRoot\Temp\nvidiaapp.exe" -ArgumentList "/s"
 
 # cleaner start menu shortcut path
 Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\NVIDIA Corporation\NVIDIA App.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -702,29 +715,25 @@ Clear-Host
 
 Write-Host "Installing: Nvidia Profile Inspector..."
 
-# remove winget app from install entry to force upgrade/install/fix
-try {
-Start-Process "winget" -ArgumentList "uninstall --product-code Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-} catch { }
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# download and install nvidia profile inspector
-try {
-Start-Process "winget" -ArgumentList "install `"Orbmu2k.nvidiaProfileInspector`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download nvidia profile inspector
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/inspector.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
 $Shortcut = $WshShell.CreateShortcut("$Desktop\Nvidia Profile Inspector.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector"
 $Shortcut.Save()
 
 # create start menu shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Nvidia Profile Inspector.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe\nvidiaProfileInspector.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Orbmu2k.nvidiaProfileInspector_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector\Nvidia Profile Inspector.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Nvidia Profile Inspector"
 $Shortcut.Save()
 
 show-menu
@@ -736,10 +745,11 @@ Clear-Host
 
 Write-Host "Installing: OBS Studio..."
 
-# download and install obs studio 
-try {
-Start-Process "winget" -ArgumentList "install `"OBSProject.OBSStudio`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }                  
+# download obs studio                      
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/obs.exe" -OutFile "$env:SystemRoot\Temp\obs.exe"
+
+# install obs studio
+Start-Process -Wait "$env:SystemRoot\Temp\obs.exe" -ArgumentList "/S"
 
 show-menu
 
@@ -750,29 +760,25 @@ Clear-Host
 
 Write-Host "Installing: Onboard Memory Manager..."
 
-# remove winget app from install entry to force upgrade/install/fix
-try {
-Start-Process "winget" -ArgumentList "uninstall --product-code Logitech.OnboardMemoryManager_Microsoft.Winget.Source_8wekyb3d8bbwe --silent" -Wait -WindowStyle Hidden
-} catch { }
+# new folder
+New-Item -Path "$env:SystemDrive\Program Files (x86)\Onboard Memory Manager" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# download and install onboard memory manager 
-try {
-Start-Process "winget" -ArgumentList "install `"Logitech.OnboardMemoryManager`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download onboard memory manager
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/omm.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Onboard Memory Manager\Onboard Memory Manager.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Desktop = (New-Object -ComObject Shell.Application).Namespace('shell:Desktop').Self.Path
 $Shortcut = $WshShell.CreateShortcut("$Desktop\Onboard Memory Manager.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Logitech.OnboardMemoryManager_Microsoft.Winget.Source_8wekyb3d8bbwe\OnboardMemoryManager.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Logitech.OnboardMemoryManager_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Onboard Memory Manager\Onboard Memory Manager.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Onboard Memory Manager"
 $Shortcut.Save()
 
 # create start menu shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Onboard Memory Manager.lnk")
-$Shortcut.TargetPath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Logitech.OnboardMemoryManager_Microsoft.Winget.Source_8wekyb3d8bbwe\OnboardMemoryManager.exe"
-$Shortcut.WorkingDirectory = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Logitech.OnboardMemoryManager_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$Shortcut.TargetPath = "$env:SystemDrive\Program Files (x86)\Onboard Memory Manager\Onboard Memory Manager.exe"
+$Shortcut.WorkingDirectory = "$env:SystemDrive\Program Files (x86)\Onboard Memory Manager"
 $Shortcut.Save()
 
 show-menu
@@ -784,10 +790,11 @@ Clear-Host
 
 Write-Host "Installing: Pot Player..."
 
-# download and install pot player 
-try {
-Start-Process "winget" -ArgumentList "install `"Daum.PotPlayer`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download pot player      
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/potplayer.exe" -OutFile "$env:SystemRoot\Temp\potplayer.exe"
+
+# install pot player 
+Start-Process -Wait "$env:SystemRoot\Temp\potplayer.exe" -ArgumentList "/S /allusers"
 
 # cleaner start menu shortcut path
 Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\PotPlayer\PotPlayer 64 bit.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -802,10 +809,23 @@ Clear-Host
 
 Write-Host "Installing: Roblox..."
 
-# download and install roblox
-try {
-Start-Process "winget" -ArgumentList "install `"Roblox.Roblox`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download roblox
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/roblox.exe" -OutFile "$env:SystemRoot\Temp\roblox.exe"
+
+# install roblox
+Start-Process "$env:SystemRoot\Temp\roblox.exe" -ArgumentList "/S"
+
+Start-Sleep -Seconds 5
+
+# stop edge running
+$stop = "MicrosoftEdgeUpdate", "msedge", "msedgewebview2"
+$stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
+Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+
+Start-Sleep -Seconds 5
+
+# cleaner start menu shortcut path
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Roblox" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 
 # create start menu shortcut
 $WshShell = New-Object -comObject WScript.Shell
@@ -820,9 +840,6 @@ $Shortcut = $WshShell.CreateShortcut("$Desktop\Roblox.url")
 $Shortcut.TargetPath = "roblox://placeId=0"
 $Shortcut.Save()
 
-# cleaner start menu shortcut path
-Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Roblox" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-
 show-menu
 
           }
@@ -832,10 +849,11 @@ Clear-Host
 
 Write-Host "Installing: Rockstar Games..."
 
-# download and install rockstar games
-try {
-Start-Process "winget" -ArgumentList "install `"RockstarGames.Launcher`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download rockstar games
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/rockstar.exe" -OutFile "$env:SystemRoot\Temp\rockstar.exe"
+
+# install rockstar games
+Start-Process -Wait "$env:SystemRoot\Temp\rockstar.exe" -ArgumentList "/s /f"
 
 # cleaner start menu shortcut path
 Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\Rockstar Games\Rockstar Games Launcher.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -863,14 +881,14 @@ Set-Content -Path "$env:APPDATA\Spotify\prefs" -Value $SpotifySettingsPrefs -For
 $Global:tempDir = (([System.IO.Path]::GetTempPath())).trimend('\')
 
 # download spotify
-IWR "https://download.scdn.co/SpotifySetup.exe" -OutFile "$tempDir\Spotify.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/spotify.exe" -OutFile "$tempDir\spotify.exe"
 
 # install spotify
-Start-Process "explorer.exe" -ArgumentList "$tempDir\Spotify.exe"
+Start-Process "explorer.exe" -ArgumentList "$tempDir\spotify.exe"
 
 Start-Sleep -Seconds 5
 
-Get-Process -Name "Spotify" -ErrorAction SilentlyContinue | Wait-Process -ErrorAction SilentlyContinue
+Get-Process -Name "spotify" -ErrorAction SilentlyContinue | Wait-Process -ErrorAction SilentlyContinue
 
 # cleaner start menu shortcut path
 Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\Spotify.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -884,10 +902,11 @@ Clear-Host
 
 Write-Host "Installing: Steam..."
 
-# download and install steam
-try {
-Start-Process "winget" -ArgumentList "install `"Valve.Steam`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download steam
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/steam.exe" -OutFile "$env:SystemRoot\Temp\steam.exe"
+
+# install steam
+Start-Process -Wait "$env:SystemRoot\Temp\steam.exe" -ArgumentList "/S"
 
 # remove logon steam
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"Steam`" /f >nul 2>&1"
@@ -905,10 +924,11 @@ Clear-Host
 
 Write-Host "Installing: Ubisoft Connect..."
 
-# download and install ubisoft connect
-try {
-Start-Process "winget" -ArgumentList "install `"Ubisoft.Connect`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download ubisoft connect
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/ubisoft.exe" -OutFile "$env:SystemRoot\Temp\ubisoft.exe"
+
+# install ubisoft connect
+Start-Process -Wait "$env:SystemRoot\Temp\ubisoft.exe" -ArgumentList "/S"
 
 # cleaner start menu shortcut path
 Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\Ubisoft\Ubisoft Connect\Ubisoft Connect.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -923,10 +943,15 @@ Clear-Host
 
 Write-Host "Installing: Valorant..."
 
-# download and install valorant 
-try {
-Start-Process "winget" -ArgumentList "install `"RiotGames.Valorant.NA`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download valorant
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/valorant.exe" -OutFile "$env:SystemRoot\Temp\valorant.exe"
+
+# install valorant
+Start-Process "$env:SystemRoot\Temp\valorant.exe" -ArgumentList "--skip-to-install"
+
+Start-Sleep -Seconds 10
+
+Get-Process -Name "valorant" -ErrorAction SilentlyContinue | Wait-Process -ErrorAction SilentlyContinue
 
 # remove logon valorant
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"RiotClient`" /f >nul 2>&1"

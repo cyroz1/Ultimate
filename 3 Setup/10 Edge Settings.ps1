@@ -91,10 +91,11 @@ Start-Sleep -Seconds 2
 # stop edge running
 Stop-Process -Name "msedge" -Force -ErrorAction SilentlyContinue
 
-# download and install edge
-try {
-Start-Process "winget" -ArgumentList "install `"Microsoft.Edge`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download edge installer
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edge.exe" -OutFile "$env:SystemRoot\Temp\edge.exe"
+
+# start edge installer
+Start-Process "$env:SystemRoot\Temp\edge.exe"
 
 exit
 

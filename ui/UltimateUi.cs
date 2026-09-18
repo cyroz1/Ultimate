@@ -383,7 +383,7 @@ namespace UltimateUi
             };
             Label subtitle = new Label
             {
-                Text = "Windows tuning toolkit  /  native controls  /  hidden PowerShell host",
+                Text = "Windows tuning toolkit  /  " + scripts.Count + " PowerShell scripts  /  native controls  /  hidden PowerShell host",
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Muted,
                 AutoSize = true,

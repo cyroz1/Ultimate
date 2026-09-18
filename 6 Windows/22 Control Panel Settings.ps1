@@ -981,6 +981,34 @@ Windows Registry Editor Version 5.00
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
 "ShowRecentList"=dword:00000000
 
+; disable pinned
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowPinnedSection"=dword:00000000
+
+; disable recent
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowRecentSection"=dword:00000000
+
+; disable show recent and suggested files
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowSuggestedFiles"=dword:00000000
+
+; enable all
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowAllAppsSection"=dword:00000001
+
+; disable show most used apps
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowFrequentList"=dword:00000000
+
+; small start menu size
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"StartMenuSize"=dword:00000001
+
+; disable hide your name and profile picture on start
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"HideUserInformation"=dword:00000000
+
 ; disable share any window from my taskbar
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
 "TaskbarSn"=dword:00000000
@@ -2503,6 +2531,34 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
 "ShowRecentList"=-
+
+; pinned
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowPinnedSection"=-
+
+; recent
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowRecentSection"=-
+
+; show recent and suggested files
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowSuggestedFiles"=-
+
+; all
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowAllAppsSection"=-
+
+; show most used apps
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"ShowFrequentList"=-
+
+; start menu size
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"StartMenuSize"=-
+
+; hide your name and profile picture on start
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"HideUserInformation"=-
 
 ; share any window from my taskbar
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]

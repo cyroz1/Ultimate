@@ -20,23 +20,33 @@
 
 Write-Host "Downloading: C++..."
 
-# download and install c++
-try {
-$packages = @(
-"Microsoft.VCRedist.2005.x86",
-"Microsoft.VCRedist.2005.x64",
-"Microsoft.VCRedist.2008.x86",
-"Microsoft.VCRedist.2008.x64",
-"Microsoft.VCRedist.2010.x86",
-"Microsoft.VCRedist.2010.x64",
-"Microsoft.VCRedist.2012.x86",
-"Microsoft.VCRedist.2012.x64",
-"Microsoft.VCRedist.2013.x86",
-"Microsoft.VCRedist.2013.x64",
-"Microsoft.VCRedist.2015+.x86",
-"Microsoft.VCRedist.2015+.x64"
-)
-foreach ($pkg in $packages) {
-Start-Process "winget" -ArgumentList "install `"$pkg`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-}
-} catch { }
+# download c++
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2005_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2005_x86.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2005_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2005_x64.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2008_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2008_x86.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2008_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2008_x64.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2010_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2010_x86.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2010_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2010_x64.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2012_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2012_x86.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2012_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2012_x64.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2013_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2013_x86.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2013_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2013_x64.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2015_2017_2019_2022_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x86.exe"
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2015_2017_2019_2022_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe"
+
+Clear-Host
+Write-Host "Installing: C++..."
+
+# install c++
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2005_x86.exe" -ArgumentList "/Q /C:`"msiexec /i vcredist.msi /qn /norestart`"" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2005_x64.exe" -ArgumentList "/Q /C:`"msiexec /i vcredist.msi /qn /norestart`"" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2008_x86.exe" -ArgumentList "/q" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2008_x64.exe" -ArgumentList "/q" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2010_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2010_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2012_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2012_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2013_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2013_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden

@@ -23,10 +23,11 @@ Write-Host "Installing: MSI Afterburner. Please wait...`n"
 Write-Host "GPU 'Power' & 'Power Percent' logging disabled"
 Write-Host "Causes FPS and 1% low issues`n"
 
-# download and install msi afterburner
-try {
-Start-Process "winget" -ArgumentList "install `"Guru3D.Afterburner.Beta`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
-} catch { }
+# download msi afterburner
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/msiafterburner.exe" -OutFile "$env:SystemRoot\Temp\msiafterburner.exe"
+
+# install msi afterburner
+Start-Process -wait "$env:SystemRoot\Temp\msiafterburner.exe" -ArgumentList "/S"
 
 # new profiles folder
 New-Item -Path "$env:SystemDrive\Program Files (x86)\MSI Afterburner" -Name "Profiles" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
@@ -4735,5 +4736,4 @@ Set-Content -Path "$env:SystemDrive\Program Files (x86)\RivaTuner Statistics Ser
 # cleaner start menu shortcut path
 Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\MSI Afterburner\MSI Afterburner.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
 Remove-Item "$env:AppData\Microsoft\Windows\Start Menu\Programs\MSI Afterburner" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Move-Item -Path "$env:AppData\Microsoft\Windows\Start Menu\Programs\RivaTuner Statistics Server\RivaTuner Statistics Server.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue | Out-Null
 Remove-Item "$env:AppData\Microsoft\Windows\Start Menu\Programs\RivaTuner Statistics Server" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
