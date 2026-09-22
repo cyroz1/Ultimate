@@ -165,7 +165,7 @@ function Invoke-CSharpBuild {
     $roslynArguments = @(
         $roslynCompiler.FullName,
         "/nologo",
-        "/noconfig+",
+        "/noconfig",
         "/nostdlib+",
         "/codepage:65001",
         "/target:winexe",
