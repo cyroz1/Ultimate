@@ -8,15 +8,26 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Test-UltimateArm64) {
+    Write-Host "On ARM64, only the Defender restore option is available. Keep memory integrity and the vulnerable-driver blocklist enabled for native driver security." -ForegroundColor Yellow
+}
+
         Write-Host "1. Defender: Disable"
         Write-Host "2. Defender: Enable (Default)`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-        1 {
+1 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "Disabling Defender and ARM64 driver security protections is unavailable in the ARM64 toolkit." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 Write-Host "Defender: Disable...`n"
 

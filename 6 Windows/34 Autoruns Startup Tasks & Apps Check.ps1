@@ -8,6 +8,15 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Test-UltimateArm64) {
+    Write-Host "This workflow removes third-party startup entries and scheduled tasks, including possible ARM64 OEM utilities. It is unavailable on ARM64." -ForegroundColor Yellow
+    Write-Host "Open Microsoft's current ARM64 Sysinternals Suite for a manual startup review."
+    Start-Process "https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite"
+    Pause
+    exit
+}
+
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 

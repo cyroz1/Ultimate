@@ -8,6 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'The NVIDIA HDCP registry preset' -Reason 'This preset writes an NVIDIA-specific key to every display-adapter registry key. Use the OEM driver control panel on ARM64 devices.') {
+    Pause
+    exit
+}
+
         Write-Host "NVIDIA High Bandwidth Digital Content Protection"
         Write-Host "1. Off (Recommended)"
         Write-Host "2. Default`n"

@@ -7,7 +7,7 @@ Exit}
 $progresspreference = 'silentlycontinue'
 
 # download
-iwr "https://github.com/FR33THYFR33THY/Ultimate/archive/refs/heads/main.zip" -OutFile "$env:SystemRoot\Temp\Ultimate.zip"
+iwr "https://github.com/cyroz1/Ultimate/archive/refs/heads/main.zip" -OutFile "$env:SystemRoot\Temp\Ultimate.zip"
 
 # extract
 Expand-Archive -Path "$env:SystemRoot\Temp\Ultimate.zip" -DestinationPath "$env:SystemRoot\Temp\Ultimate" -Force

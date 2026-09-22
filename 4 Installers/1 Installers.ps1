@@ -8,6 +8,8 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
@@ -21,6 +23,14 @@
         function show-menu {
 	    Clear-Host
 	    Write-Host "Game launchers, programs and web browsers"
+	    if (Test-UltimateArm64) {
+	        if ((Get-UltimateWindowsBuild) -ge 22000) {
+	            Write-Host "ARM64: Windows 11 can emulate x86/x64 apps; kernel drivers and game anti-cheat need native ARM64 support."
+	        } else {
+	            Write-Host "ARM64: Windows 10 emulates x86 apps only; x64 installers may not run."
+	        }
+	        Write-Host ""
+	    }
 		Write-Host "- Turn off cloud config/cloud sync"
         Write-Host "- Disable hardware acceleration"
         Write-Host "- Turn off running at startup"
@@ -62,6 +72,13 @@
         $choice = Read-Host " "
         if ($choice -match '^(2[0-8]|1[0-9]|[1-9])$') {
 
+        if ((Test-UltimateArm64) -and (Get-UltimateWindowsBuild) -lt 22000 -and $choice -notin @('1', '28')) {
+            Write-Host "This Windows 10 ARM64 package only includes an ARM64 build for 7-Zip. Other pinned installers are x64 or unverified; Windows 10 on Arm only emulates x86 apps." -ForegroundColor Yellow
+            Pause
+            show-menu
+            continue
+        }
+
         switch ($choice) {
         1 {
 
@@ -69,8 +86,8 @@ Clear-Host
 
 Write-Host "Installing: 7Zip..."
 
-# download 7zip
-IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/7zip.exe" -OutFile "$env:SystemRoot\Temp\7zip.exe"
+# download 7zip for the operating system architecture
+IWR (Get-Ultimate7ZipInstallerUri) -OutFile "$env:SystemRoot\Temp\7zip.exe"
 
 # install 7zip
 Start-Process -Wait "$env:SystemRoot\Temp\7zip.exe" -ArgumentList "/S"
@@ -184,6 +201,12 @@ Clear-Host
 Write-Host "Installing:"
 Write-Host "- Custom Resolution Utility..."
 Write-Host "- Scaled Resolution Editor..."
+
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'Custom Resolution Utility and Scaled Resolution Editor' -Reason 'These tools apply desktop monitor and display-driver overrides. Use the ARM64 device manufacturer display controls.') {
+    Pause
+    show-menu
+    break
+}
 
 # new folder
 New-Item -Path "$env:SystemDrive\Program Files (x86)\CRUSRE" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
@@ -406,6 +429,12 @@ Clear-Host
 
 Write-Host "Installing: Frame View..."
 
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'NVIDIA FrameView' -Reason 'The bundled build is not verified for ARM64 GPU telemetry. Use monitoring tools supplied for the device and its native graphics driver.') {
+    Pause
+    show-menu
+    break
+}
+
 # download frame view
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/frameview.exe" -OutFile "$env:SystemRoot\Temp\frameview.exe"
 
@@ -559,6 +588,12 @@ show-menu
 Clear-Host
 
 Write-Host "Installing: More Clock Tool..."
+
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'More Clock Tool' -Reason 'This utility applies desktop GPU clock controls and the included build is not validated for ARM64 graphics drivers.') {
+    Pause
+    show-menu
+    break
+}
 
 # new folder
 New-Item -Path "$env:SystemDrive\Program Files (x86)\More Clock Tool" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
@@ -942,6 +977,12 @@ show-menu
 Clear-Host
 
 Write-Host "Installing: Valorant..."
+
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'Valorant installation' -Reason 'The game requires kernel anti-cheat support. Windows on Arm cannot emulate x86/x64 kernel drivers; use it only when Riot provides ARM64-compatible Vanguard support.') {
+    Pause
+    show-menu
+    break
+}
 
 # download valorant
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/valorant.exe" -OutFile "$env:SystemRoot\Temp\valorant.exe"

@@ -8,6 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'The AMD ULPS registry preset' -Reason 'It writes AMD driver settings across display-adapter registry keys. Use the device manufacturer graphics controls on ARM64.') {
+    Pause
+    exit
+}
+
         Write-Host "OFF NOT RECOMMENDED WITH HAGS:`n"
         Write-Host "AMD Ultra Low Power Saving:"
         Write-Host "1. On (Default)"

@@ -8,6 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'The NVIDIA P0 power-state registry preset' -Reason 'This preset writes an NVIDIA-specific key to every display-adapter registry key. Use the OEM driver control panel on ARM64 devices.') {
+    Pause
+    exit
+}
+
         Write-Host "NVIDIA Highest Performance Power State"
 		Write-Host "Always Force Max Boost Clock`n"
         Write-Host "1. On (Recommended)"

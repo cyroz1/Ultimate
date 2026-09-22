@@ -8,6 +8,8 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
         Write-Host "1. Timer Resolution: On (Recommended)"
         Write-Host "2. Timer Resolution: Default`n"
         while ($true) {
@@ -218,22 +220,64 @@ namespace WindowsService
 '@
 Set-Content -Path "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -Value $csfile -Force
 
-# compile and create service
-Start-Process -Wait "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -ArgumentList "-out:C:\Windows\SetTimerResolutionService.exe C:\Windows\SetTimerResolutionService.cs" -WindowStyle Hidden
+# choose an available compiler that can run on this Windows architecture
+if ((Test-UltimateArm64) -and ((Get-UltimateWindowsBuild) -lt 22000)) {
+    $compilerCandidates = @("$env:WINDIR\Microsoft.NET\Framework\v4.0.30319\csc.exe")
+} else {
+    $compilerCandidates = @(
+        "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe",
+        "$env:WINDIR\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+    )
+}
+$compilerPath = $compilerCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+if (-not $compilerPath) {
+    Remove-Item "$env:WINDIR\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "A compatible .NET Framework C# compiler was not found; the timer-resolution service was not installed." -ForegroundColor Yellow
+    Pause
+    exit
+}
+
+$frameworkRoot = Split-Path -Parent $compilerPath
+$referencePaths = @(
+    (Join-Path $frameworkRoot "System.Management.dll"),
+    (Join-Path $frameworkRoot "System.ServiceProcess.dll"),
+    (Join-Path $frameworkRoot "System.Configuration.Install.dll")
+)
+if ($referencePaths | Where-Object { -not (Test-Path -LiteralPath $_) }) {
+    Remove-Item "$env:WINDIR\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "Required .NET Framework references were not found; the timer-resolution service was not installed." -ForegroundColor Yellow
+    Pause
+    exit
+}
+
+$compilerArguments = @(
+    "/out:$env:WINDIR\SetTimerResolutionService.exe",
+    "/reference:$($referencePaths[0])",
+    "/reference:$($referencePaths[1])",
+    "/reference:$($referencePaths[2])",
+    "$env:WINDIR\SetTimerResolutionService.cs"
+)
+$compileResult = Start-Process -FilePath $compilerPath -ArgumentList $compilerArguments -Wait -PassThru -WindowStyle Hidden
+if ($compileResult.ExitCode -ne 0 -or -not (Test-Path -LiteralPath "$env:WINDIR\SetTimerResolutionService.exe")) {
+    Remove-Item "$env:WINDIR\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "The timer-resolution service did not compile successfully; it was not installed." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 # remove cs file
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null
 
 # remove old service if exists
-if (Get-Service -Name "Set Timer Resolution Service" -ErrorAction SilentlyContinue) {
-sc.exe delete "Set Timer Resolution Service" | Out-Null
+if (Get-Service -Name "STR" -ErrorAction SilentlyContinue) {
+sc.exe delete "STR" | Out-Null
 Start-Sleep -Seconds 2
 }
 
 # install and start service
-New-Service -Name "Set Timer Resolution Service" -BinaryPathName "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -ErrorAction SilentlyContinue | Out-Null
-Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction SilentlyContinue | Out-Null
-Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
+New-Service -Name "STR" -DisplayName "Set Timer Resolution Service" -BinaryPathName "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -StartupType Automatic -ErrorAction SilentlyContinue | Out-Null
+Set-Service -Name "STR" -StartupType Automatic -ErrorAction SilentlyContinue | Out-Null
+Set-Service -Name "STR" -Status Running -ErrorAction SilentlyContinue | Out-Null
 
 # enable global timer resolution requests
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel`" /v `"GlobalTimerResolutionRequests`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
@@ -249,9 +293,9 @@ exit
 Clear-Host
 
 # stop disable delete service
-Set-Service -Name "Set Timer Resolution Service" -StartupType Disabled -ErrorAction SilentlyContinue | Out-Null
-Set-Service -Name "Set Timer Resolution Service" -Status Stopped -ErrorAction SilentlyContinue | Out-Null
-sc.exe delete "Set Timer Resolution Service" | Out-Null
+Set-Service -Name "STR" -StartupType Disabled -ErrorAction SilentlyContinue | Out-Null
+Set-Service -Name "STR" -Status Stopped -ErrorAction SilentlyContinue | Out-Null
+sc.exe delete "STR" | Out-Null
 
 # delete file
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -Force -ErrorAction SilentlyContinue | Out-Null

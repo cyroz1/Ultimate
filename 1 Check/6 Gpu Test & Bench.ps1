@@ -8,6 +8,15 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
+if (Test-UltimateArm64) {
+    Write-Host "The bundled FurMark program is an x64 build; this script does not assume it can stress every ARM64 GPU driver correctly." -ForegroundColor Yellow
+    Write-Host "Use your device manufacturer's ARM64 graphics diagnostics for GPU stress testing."
+    Pause
+    exit
+}
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

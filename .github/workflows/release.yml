@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version, for example 0.1.6"
+        description: "Release version, for example 0.1.7"
         required: true
-        default: "0.1.6"
+        default: "0.1.7"
 
 permissions:
   contents: write
@@ -43,7 +43,7 @@ jobs:
       - name: Validate build and UI host syntax
         shell: powershell
         run: |
-          $files = @('.\build\build.ps1', '.\ui\PowerShellHost.ps1')
+          $files = @('.\build\build.ps1', '.\ui\PowerShellHost.ps1', '.\ui\UltimateArchitecture.ps1')
           foreach ($file in $files) {
             $tokens = $null
             $errors = $null

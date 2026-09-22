@@ -8,6 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'Display Driver Uninstaller' -Reason 'The bundled cleanup workflow targets x64 display drivers. Use Windows Update or your device manufacturer recovery tools for ARM64 graphics drivers.') {
+    Pause
+    exit
+}
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

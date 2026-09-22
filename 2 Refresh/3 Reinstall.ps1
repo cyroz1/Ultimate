@@ -8,6 +8,16 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
+if (Test-UltimateArm64) {
+    Write-Host "Windows Media Creation Tool does not create Arm64 bootable media." -ForegroundColor Yellow
+    Write-Host "For this device, use its manufacturer recovery image or download the Windows 11 Arm64 ISO." -ForegroundColor Yellow
+    Start-Process "https://www.microsoft.com/software-download/windows11arm64"
+    Pause
+    exit
+}
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

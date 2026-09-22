@@ -8,9 +8,13 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-# get motherboard id
-$instanceID = (Get-CimInstance Win32_BaseBoard).Product
-$query = [uri]::EscapeDataString($instanceID)
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
 
-# search motherboard id in web browser
+# Windows on Arm drivers are supplied by the device manufacturer or Windows Update.
+$computer = Get-CimInstance Win32_ComputerSystem
+$baseboard = Get-CimInstance Win32_BaseBoard
+$deviceModel = if (Test-UltimateArm64) { "$($computer.Manufacturer) $($computer.Model)" } else { $baseboard.Product }
+$query = [uri]::EscapeDataString("$deviceModel Windows network drivers")
+
+# Search using the device model, which is more useful than a generic Arm baseboard ID.
 Start-Process "https://www.google.com/search?q=$query"

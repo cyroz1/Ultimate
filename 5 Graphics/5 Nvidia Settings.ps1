@@ -8,6 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'The NVIDIA desktop driver settings preset' -Reason 'It installs a pinned NVIDIA Control Panel package and applies desktop-specific driver registry and profile settings. Use ARM64 driver controls supplied by the device manufacturer.') {
+    Pause
+    exit
+}
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

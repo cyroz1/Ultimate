@@ -8,6 +8,8 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
@@ -18,15 +20,25 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-        Write-Host "1. Edge & WebView: Uninstall (Recommended)"
+        if (Test-UltimateArm64) {
+            Write-Host "1. Edge & WebView: Uninstall (Unavailable on ARM64)"
+        } else {
+            Write-Host "1. Edge & WebView: Uninstall (Recommended)"
+        }
         Write-Host "2. Edge & WebView: Default`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-        1 {
+1 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "The uninstall workflow removes the system Edge and WebView components. Keep the OEM-provided ARM64 browser components installed." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 Write-Host "Edge & WebView: Uninstall..."
 
@@ -132,6 +144,20 @@ exit
 Clear-Host
 
 Write-Host "Edge & WebView: Default..."
+
+if (Test-UltimateArm64) {
+    Write-Host "Opening Microsoft's Edge download page for the matching ARM64 browser..."
+    Start-Process "https://www.microsoft.com/edge/download"
+
+    Write-Host "Installing the WebView2 Evergreen runtime using Microsoft's architecture-matching bootstrapper..."
+    $webViewInstaller = "$env:SystemRoot\Temp\edgewebview2setup.exe"
+    IWR "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $webViewInstaller
+    Start-Process -Wait $webViewInstaller -ArgumentList "/silent /install"
+
+    Write-Host "Use the Edge Settings script separately for browser policy changes."
+    Pause
+    exit
+}
 
 # stop edge running
 $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"

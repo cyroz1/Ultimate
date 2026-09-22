@@ -8,6 +8,8 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
@@ -48,6 +50,13 @@ exit
         2 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "Removing every installed UWP app can remove the device manufacturer's ARM64 control and support apps. This bulk removal is unavailable on ARM64." -ForegroundColor Yellow
+    Pause
+    show-menu
+    break
+}
 
 Write-Host "Uninstalling: UWP Apps. Please wait...`n"
 
@@ -456,6 +465,18 @@ Clear-Host
 
 Write-Host "Installing: Remote Desktop Connection. Please wait..."
 
+if (Test-UltimateArm64) {
+    Write-Host "Using the Remote Desktop Connection client included with Windows on Arm."
+    if (Get-Command "mstsc.exe" -ErrorAction SilentlyContinue) {
+        Start-Process "mstsc.exe"
+    } else {
+        Write-Host "The Remote Desktop Connection client is not installed. Check Windows optional features or the Microsoft Store." -ForegroundColor Yellow
+        Start-Process "ms-settings:appsfeatures"
+    }
+    show-menu
+    break
+}
+
 # download remote desktop connection
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/remotedesktopconnection.exe" -OutFile "$env:SystemRoot\Temp\remotedesktopconnection.exe"
 
@@ -474,6 +495,19 @@ Write-Host ""
 Write-Host "Ignore installer error W11"
 Write-Host "If installer fails on W10, restart PC and rerun script"
 Write-Host ""
+
+if (Test-UltimateArm64) {
+    # Use the installed native package or let Microsoft Store install its ARM64 build.
+    $snippingPackage = Get-AppXPackage -AllUsers *Microsoft.ScreenSketch* | Select-Object -First 1
+    $snippingManifest = if ($snippingPackage) { Join-Path $snippingPackage.InstallLocation 'AppXManifest.xml' }
+    if ($snippingManifest -and (Test-Path -LiteralPath $snippingManifest)) {
+        Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue $snippingManifest
+    } else {
+        Start-Process "ms-windows-store://pdp/?productid=9MZ95KL8MR0L"
+    }
+    show-menu
+    break
+}
 
 # download w10 snipping tool
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/snippingtool.exe" -OutFile "$env:SystemRoot\Temp\snippingtool.exe"

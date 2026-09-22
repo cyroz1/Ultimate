@@ -8,6 +8,8 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
@@ -92,6 +94,11 @@ Start-Sleep -Seconds 2
 Stop-Process -Name "msedge" -Force -ErrorAction SilentlyContinue
 
 # download edge installer
+if (Test-UltimateArm64) {
+    Write-Host "Opening Microsoft's Edge download page to obtain the native ARM64 browser installer."
+    Start-Process "https://www.microsoft.com/edge/download"
+    exit
+}
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edge.exe" -OutFile "$env:SystemRoot\Temp\edge.exe"
 
 # start edge installer

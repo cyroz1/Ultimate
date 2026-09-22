@@ -8,6 +8,16 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
+if (Test-UltimateArm64) {
+    Write-Host "The bundled OCCT program and its CPU benchmark are not an ARM64-native test." -ForegroundColor Yellow
+    Write-Host "Use the device manufacturer's ARM64 diagnostics for stress and thermal checks."
+    Write-Host "Windows reports a translated processor to x64 emulated applications, so their CPU results are not comparable to native ARM results."
+    Pause
+    exit
+}
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

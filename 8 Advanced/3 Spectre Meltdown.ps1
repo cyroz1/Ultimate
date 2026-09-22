@@ -8,15 +8,27 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Test-UltimateArm64) {
+    Write-Host "Windows on Arm uses processor-specific mitigation defaults. This Intel/AMD override is unavailable on ARM64." -ForegroundColor Yellow
+    Write-Host "Use option 2 to remove the override and restore Windows defaults."
+}
+
         Write-Host "1. Spectre Meltdown: Disable"
         Write-Host "2. Spectre Meltdown: Enable (Default)`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-        1 {
+1 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "The bundled Spectre/Meltdown override is not intended for ARM64 processors." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 # disable spectre meltdown
 cmd /c "reg add `"HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager\Memory Management`" /v `"FeatureSettingsOverrideMask`" /t REG_DWORD /d `"3`" /f >nul 2>&1"

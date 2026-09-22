@@ -8,6 +8,8 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
 # save autounattendtemplate
 $AutoUnattend = @'
 <?xml version="1.0" encoding="utf-8"?>
@@ -149,6 +151,18 @@ $AutoUnattend = @'
     </settings>
 </unattend>
 '@
+$AutoUnattend = $AutoUnattend.Replace(
+    'processorArchitecture="amd64"',
+    'processorArchitecture="' + (Get-UltimateUnattendArchitecture) + '"'
+)
+if (Test-UltimateArm64) {
+    # Keep Windows on Arm's TPM, Secure Boot, CPU and storage checks enabled.
+    $AutoUnattend = [regex]::Replace(
+        $AutoUnattend,
+        '(?s)(<component name="Microsoft-Windows-Setup".*?)\s*<RunSynchronous>.*?</RunSynchronous>',
+        '$1'
+    )
+}
 Set-Content -Path "$env:SystemRoot\Temp\autounattendtemplate.xml" -Value $AutoUnattend -Force
 
 # user input change account name in autounattendtemplate

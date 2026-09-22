@@ -8,6 +8,11 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Test-UltimateArm64) {
+    Write-Host "Keep Windows and OEM services enabled on ARM64 so that device power, sensor, firmware and driver support stays available." -ForegroundColor Yellow
+}
+
         # CREATE A RESTORE POINT
         try {
         cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore`" /v `"SystemRestorePointCreationFrequency`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
@@ -39,6 +44,12 @@
         1 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "The bulk service-disable preset is unavailable on ARM64 because OEM services and device dependencies vary by model." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 Write-Host "Services: Off...`n"
 

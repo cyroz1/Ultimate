@@ -8,6 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+if (Stop-UltimateArm64UnsupportedFeature -Feature 'The SMT/HT affinity preset' -Reason 'Its alternating-processor mask assumes x86 SMT thread ordering and can disable the wrong cores on ARM64 SoCs.') {
+    Pause
+    exit
+}
+
 		Write-Host "TEMPORARILY DISABLE CPU THREADS FOR TESTING PER APP/GAME`n"
         Write-Host "SMT/HT:"
         Write-Host "1. Off: Already Running"

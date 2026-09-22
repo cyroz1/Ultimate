@@ -8,7 +8,12 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
 	    Write-Host "WINDOWS PRO/LTSC/IOT/SERVER ONLY`n"
+	    if (Test-UltimateArm64) {
+	        Write-Host "On ARM64, keep Windows Update available for device-specific drivers and firmware. Blocking options are disabled; use the Unblock options if updates were restricted.`n" -ForegroundColor Yellow
+	    }
         Write-Host "DRIVER UPDATES:"
         Write-Host " 1. Block"
 	    Write-Host " 2. Block (Bootable USB)"
@@ -24,6 +29,12 @@
         1 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "Blocking Windows driver updates can prevent OEM ARM64 driver and firmware delivery." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 Write-Host "Blocked: Driver Updates"
 
@@ -46,6 +57,12 @@ exit
         2 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "Do not block OEM ARM64 drivers in the bootable Windows setup." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 Write-Host "Blocked: Driver Updates (Bootable USB)"
 
@@ -107,6 +124,12 @@ exit
 
 Clear-Host
 
+if (Test-UltimateArm64) {
+    Write-Host "Blocking Windows Update can prevent OEM ARM64 driver and firmware delivery." -ForegroundColor Yellow
+    Pause
+    exit
+}
+
 Write-Host "Blocked: Updates"
 
 # block all windows updates
@@ -127,6 +150,12 @@ exit
         5 {
 
 Clear-Host
+
+if (Test-UltimateArm64) {
+    Write-Host "Do not block Windows Update in the bootable Windows setup for an ARM64 device." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 Write-Host "Blocked: Updates (Bootable USB)"
 

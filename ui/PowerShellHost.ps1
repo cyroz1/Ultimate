@@ -11,6 +11,8 @@ if (-not [string]::IsNullOrWhiteSpace($Architecture)) {
     $env:ULTIMATE_TOOLKIT_ARCHITECTURE = $Architecture
 }
 
+. (Join-Path $PSScriptRoot 'UltimateArchitecture.ps1')
+
 # This host is used by UltimateUI.exe.  It deliberately keeps PowerShell
 # non-interactive from the user's point of view: prompts and file-picker
 # requests are sent to the desktop UI through a small, line-oriented protocol
