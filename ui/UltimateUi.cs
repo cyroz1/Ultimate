@@ -9,6 +9,18 @@ using System.Windows.Forms;
 
 namespace UltimateUi
 {
+#if ULTIMATE_ARM64
+    internal static class BuildIdentity
+    {
+        public const string Architecture = "arm64";
+    }
+#else
+    internal static class BuildIdentity
+    {
+        public const string Architecture = "x64";
+    }
+#endif
+
     internal sealed class ScriptOption
     {
         public string Key;
@@ -75,7 +87,7 @@ namespace UltimateUi
         public event Action<string, bool> Output;
         public event Action<int> Completed;
 
-        public ScriptRunner(string root, string hostPath, string scriptPath)
+        public ScriptRunner(string root, string hostPath, string scriptPath, string architecture)
         {
             string powershell = Path.Combine(
                 Environment.GetEnvironmentVariable("WINDIR") ?? @"C:\Windows",
@@ -90,7 +102,8 @@ namespace UltimateUi
             {
                 FileName = powershell,
                 Arguments = "-NoLogo -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File " +
-                            Quote(hostPath) + " -ScriptPath " + Quote(scriptPath),
+                            Quote(hostPath) + " -ScriptPath " + Quote(scriptPath) +
+                            " -Architecture " + Quote(architecture),
                 WorkingDirectory = root,
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -346,6 +359,7 @@ namespace UltimateUi
             scripts = LoadScripts();
 
             Text = "Ultimate — Windows Toolkit";
+            Text += " (" + BuildIdentity.Architecture + ")";
             StartPosition = FormStartPosition.CenterScreen;
             MinimumSize = new Size(980, 650);
             Size = new Size(1220, 820);
@@ -383,7 +397,8 @@ namespace UltimateUi
             };
             Label subtitle = new Label
             {
-                Text = "Windows tuning toolkit  /  " + scripts.Count + " PowerShell scripts  /  native controls  /  hidden PowerShell host",
+                Text = "Windows tuning toolkit  /  " + BuildIdentity.Architecture +
+                       " GUI  /  " + scripts.Count + " PowerShell scripts  /  native controls  /  hidden PowerShell host",
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Muted,
                 AutoSize = true,
@@ -978,7 +993,7 @@ namespace UltimateUi
             cancelButton.Enabled = true;
             statusLabel.Text = "Running " + currentScript.Title + "...";
 
-            runner = new ScriptRunner(root, hostPath, currentScript.FullPath);
+            runner = new ScriptRunner(root, hostPath, currentScript.FullPath, BuildIdentity.Architecture);
             runner.Output += HandleRunnerOutput;
             runner.Completed += HandleRunnerCompleted;
             try

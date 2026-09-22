@@ -15,7 +15,12 @@ See [SCRIPT_GUIDE.md](SCRIPT_GUIDE.md) for a brief explanation of every bundled 
 
 ### Download
 
-Download and run the latest `Ultimate-UI-v*-win-x64.msi` from the fork's [Releases](../../releases) page. The installer places the toolkit under Program Files, adds an Ultimate shortcut to the Start menu, and registers normal Windows uninstall/upgrade support.
+Download the package that matches the Windows device from the fork's [Releases](../../releases) page:
+
+- `Ultimate-UI-v*-win-x64.msi` for Intel/AMD 64-bit Windows.
+- `Ultimate-UI-v*-win-arm64.msi` for Windows on ARM64.
+
+Each package contains its own architecture-targeted GUI and a separate copy of the PowerShell script payload. The installer places the toolkit under Program Files, adds an Ultimate shortcut to the Start menu, and registers normal Windows uninstall/upgrade support.
 
 ### Build on Windows
 
@@ -27,10 +32,15 @@ wix extension add -g WixToolset.UI.wixext/5.0.2
 ```
 
 ```powershell
-.\build\build.ps1 -Version 0.1.5
+.\build\build.ps1 -Version 0.1.6
 ```
 
-The native MSI is written to `dist\Ultimate-UI-v0.1.5-win-x64.msi`. Pushing a `v*` tag runs the Windows build and publishes the MSI as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
+The command writes both native MSIs and portable script/GUI bundles to `dist`:
+
+- `Ultimate-UI-v0.1.6-win-x64.msi` and `.zip`
+- `Ultimate-UI-v0.1.6-win-arm64.msi` and `.zip`
+
+Use `-Architecture x64` or `-Architecture arm64` to build one target. Pushing a `v*` tag builds both targets and publishes all four artifacts as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
 
 # Requirements
 - Windows 10/11 Home/Pro/LTSC/IoT/Server
@@ -44,4 +54,4 @@ iwr https://github.com/cyroz1/Ultimate/raw/refs/heads/main/IWR.ps1 -useb | iex
 ```
 
 # Guide
-[![Video](https://img.youtube.com/vi/zwPEDXteJYQ/maxresdefault.jpg)](https://youtu.be/zwPEDXteJYQ)
+[![Video](https://img.youtube.com/vi/zwPEDXteJYQ/maxresdefault.jpg)](https://youtu.be/zwPEDXteJYQY)

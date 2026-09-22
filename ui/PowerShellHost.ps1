@@ -1,7 +1,15 @@
 param(
     [Parameter(Mandatory = $true)]
-    [string]$ScriptPath
+    [string]$ScriptPath,
+    [string]$Architecture = ""
 )
+
+if (-not [string]::IsNullOrWhiteSpace($Architecture)) {
+    if ($Architecture -notin @("x64", "arm64")) {
+        throw "Unsupported toolkit architecture: $Architecture"
+    }
+    $env:ULTIMATE_TOOLKIT_ARCHITECTURE = $Architecture
+}
 
 # This host is used by UltimateUI.exe.  It deliberately keeps PowerShell
 # non-interactive from the user's point of view: prompts and file-picker
