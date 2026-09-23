@@ -8,11 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "Keep memory compression and page combining enabled on ARM64 devices, where memory is commonly soldered and not upgradeable." -ForegroundColor Yellow
-}
-
         Write-Host "MMAgent Features:"
         Write-Host "1. Off"
         Write-Host "2. Default"
@@ -21,15 +16,9 @@ if (Test-UltimateArm64) {
         $choice = Read-Host " "
         if ($choice -match '^[1-3]$') {
         switch ($choice) {
-1 {
+        1 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "Disabling memory compression and page combining is unavailable on ARM64." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
 Write-Host "MMAgent Features: Off"
 
@@ -79,14 +68,14 @@ Enable-MMAgent -ApplicationPreLaunch -ErrorAction SilentlyContinue | Out-Null
 # enable maxoperationapifiles
 Set-MMAgent -MaxOperationAPIFiles 512 -ErrorAction SilentlyContinue | Out-Null
 
-# enable memorycompression
-Enable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue | Out-Null
+# disable memorycompression
+Disable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue | Out-Null
 
 # enable operationapi
 Enable-MMAgent -OperationAPI -ErrorAction SilentlyContinue | Out-Null
 
-# enable pagecombining
-Enable-MMAgent -PageCombining -ErrorAction SilentlyContinue | Out-Null
+# disable pagecombining
+Disable-MMAgent -PageCombining -ErrorAction SilentlyContinue | Out-Null
 
 exit
 

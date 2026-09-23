@@ -20,25 +20,15 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-        if (Test-UltimateArm64) {
-            Write-Host "1. Edge & WebView: Uninstall (Unavailable on ARM64)"
-        } else {
-            Write-Host "1. Edge & WebView: Uninstall (Recommended)"
-        }
+        Write-Host "1. Edge & WebView: Uninstall (Recommended)"
         Write-Host "2. Edge & WebView: Default`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-1 {
+        1 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "The uninstall workflow removes the system Edge and WebView components. Keep the OEM-provided ARM64 browser components installed." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
 Write-Host "Edge & WebView: Uninstall..."
 
@@ -79,7 +69,7 @@ New-Item -Path "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
 New-Item -Path "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe" -ItemType File -Name "MicrosoftEdge.exe" -ErrorAction SilentlyContinue | Out-Null
 
 # find edge uninstall string
-$regview = [Microsoft.Win32.RegistryView]::Registry32
+$regview = if (Test-UltimateArm64) { [Microsoft.Win32.RegistryView]::Registry64 } else { [Microsoft.Win32.RegistryView]::Registry32 }
 $microsoft = [Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::LocalMachine, $regview).
 OpenSubKey("SOFTWARE\Microsoft", $true)
 $uninstallregkey = $microsoft.OpenSubKey("Windows\CurrentVersion\Uninstall\Microsoft Edge")
@@ -94,16 +84,22 @@ Start-Process cmd.exe "/c $uninstallstring" -WindowStyle Hidden -Wait
 # clean folder file
 Remove-Item -Recurse -Force "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe" -ErrorAction SilentlyContinue | Out-Null
 
-# remove edgewebview uninstaller
-cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView`" /f >nul 2>&1"
+# remove edgewebview uninstaller from its native architecture registry view
+if (Test-UltimateArm64) {
+    cmd /c "reg delete `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView`" /f >nul 2>&1"
+} else {
+    cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft EdgeWebView`" /f >nul 2>&1"
+}
 
 # remove edge uninstaller
-$findmicrosoftedge = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+$uninstallRegistryBase = if (Test-UltimateArm64) { "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" } else { "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" }
+$findmicrosoftedge = "$uninstallRegistryBase\*"
 $microsoftedge = Get-ItemProperty $findmicrosoftedge -ErrorAction SilentlyContinue |
 Where-Object { $_.DisplayName -like "*Microsoft Edge*" }
 if ($microsoftedge) {
 $guid = $microsoftedge.PSChildName
-cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\$guid`" /f >nul 2>&1"
+$uninstallRegistryBase = $uninstallRegistryBase.Replace('HKLM:\', 'HKLM\')
+cmd /c "reg delete `"$uninstallRegistryBase\$guid`" /f >nul 2>&1"
 }
 
 # remove edge shortcut
@@ -145,18 +141,21 @@ Clear-Host
 
 Write-Host "Edge & WebView: Default..."
 
+# stop edge running
+$stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"
+$stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
+Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+
+# download edge installer
 if (Test-UltimateArm64) {
-    Write-Host "Opening Microsoft's Edge download page for the matching ARM64 browser..."
     Start-Process "https://www.microsoft.com/edge/download"
-
-    Write-Host "Installing the WebView2 Evergreen runtime using Microsoft's architecture-matching bootstrapper..."
-    $webViewInstaller = "$env:SystemRoot\Temp\edgewebview2setup.exe"
-    IWR "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $webViewInstaller
-    Start-Process -Wait $webViewInstaller -ArgumentList "/silent /install"
-
-    Write-Host "Use the Edge Settings script separately for browser policy changes."
+    Write-Host "Download and install the ARM64 version of Edge, then press Enter to continue with WebView2 and the existing Edge settings." -ForegroundColor Yellow
     Pause
-    exit
+} else {
+    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edge.exe" -OutFile "$env:SystemRoot\Temp\edge.exe"
+
+    # start edge installer
+    Start-Process -Wait "$env:SystemRoot\Temp\edge.exe"
 }
 
 # stop edge running
@@ -164,22 +163,17 @@ $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "Micros
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 
-# download edge installer
-IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edge.exe" -OutFile "$env:SystemRoot\Temp\edge.exe"
-
-# start edge installer
-Start-Process -Wait "$env:SystemRoot\Temp\edge.exe"
-
-# stop edge running
-$stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"
-$stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
-Get-Process | Where-Object { $_.ProcessName -like "*edge*" } | Stop-Process -Force -ErrorAction SilentlyContinue
-
 # download edge webview installer
-IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edgewebview.exe" -OutFile "$env:SystemRoot\Temp\edgewebview.exe"
+if (Test-UltimateArm64) {
+    $webViewInstaller = "$env:SystemRoot\Temp\edgewebview2setup.exe"
+    IWR "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $webViewInstaller
+    Start-Process -Wait $webViewInstaller -ArgumentList "/silent /install"
+} else {
+    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edgewebview.exe" -OutFile "$env:SystemRoot\Temp\edgewebview.exe"
 
-# start edge webview installer
-Start-Process -Wait "$env:SystemRoot\Temp\edgewebview.exe"
+    # start edge webview installer
+    Start-Process -Wait "$env:SystemRoot\Temp\edgewebview.exe"
+}
 
 # stop edge running
 $stop = "backgroundTaskHost", "Copilot", "CrossDeviceResume", "GameBar", "MicrosoftEdgeUpdate", "msedge", "msedgewebview2", "OneDrive", "OneDrive.Sync.Service", "OneDriveStandaloneUpdater", "Resume", "RuntimeBroker", "Search", "SearchHost", "Setup", "StoreDesktopExtension", "WidgetService", "Widgets"

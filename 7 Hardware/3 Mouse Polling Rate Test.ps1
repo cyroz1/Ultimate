@@ -8,16 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if ((Test-UltimateArm64) -and (Get-UltimateWindowsBuild) -lt 22000) {
-    Write-Host "The bundled mouse test is not validated as an x86 app for Windows 10 on Arm. Use device-native or browser-based input diagnostics." -ForegroundColor Yellow
-    Pause
-    exit
-}
-if (Test-UltimateArm64) {
-    Write-Host "The bundled mouse test build is not ARM64-native. Treat high-rate timing results as indicative." -ForegroundColor Yellow
-}
-
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

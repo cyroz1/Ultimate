@@ -8,12 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'The display-adapter MSI mode preset' -Reason 'It changes interrupt settings for every display adapter without checking OEM support. Leave this ARM64 device setting to the device manufacturer.') {
-    Pause
-    exit
-}
-
         Write-Host "1. Msi Mode: On (Recommended)"
         Write-Host "2. Msi Mode: Off`n"
         while ($true) {

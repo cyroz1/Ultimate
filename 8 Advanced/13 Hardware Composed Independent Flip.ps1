@@ -8,8 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
         Write-Host "1. Hardware Composed Independent Flip"
         Write-Host "2. Hardware Independent Flip (Default)`n"
         while ($true) {
@@ -17,10 +15,6 @@
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
         1 {
-
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'The forced hardware composed independent flip preset' -Reason 'This low-level graphics scheduler override is not validated with ARM64 display drivers. Use the default Windows and OEM graphics settings.') {
-    exit
-}
 
 Clear-Host
 
@@ -33,7 +27,7 @@ exit
 
 Clear-Host
 
-cmd /c "reg delete `"HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler`" /v `"ForceFlipTrueImmediateMode`" /f >nul 2>&1"
+cmd /c "reg delete `"HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler`" /f >nul 2>&1"
 
 exit
 

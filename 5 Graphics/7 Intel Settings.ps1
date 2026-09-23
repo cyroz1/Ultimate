@@ -8,12 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'The Intel graphics settings preset' -Reason 'It writes Intel-only registry settings across display-adapter keys. ARM64 device graphics settings should be managed by the device manufacturer.') {
-    Pause
-    exit
-}
-
         Write-Host "1. INTEL Settings: On (Recommended)"
         Write-Host "2. INTEL Settings: Default`n"
         while ($true) {

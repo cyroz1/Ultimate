@@ -9,7 +9,7 @@
         Clear-Host
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'The HIDUSBF controller overclock driver' -Reason 'The included filter driver is not an ARM64 driver and cannot be installed through x86/x64 emulation. Use a controller utility with an ARM64 driver from its manufacturer.') {
+if (Stop-UltimateArm64UnsupportedKernelDriver -Feature 'The HIDUSBF controller overclock utility' -Reason 'Its included HID filter driver is not an ARM64 driver, so Windows cannot load it.') {
     Pause
     exit
 }

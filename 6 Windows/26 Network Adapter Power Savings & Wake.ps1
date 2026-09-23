@@ -8,26 +8,15 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "Keep OEM-managed network adapter power and wake settings on ARM64 to preserve battery life and Modern Standby." -ForegroundColor Yellow
-}
-
         Write-Host "1. Network Adapter Power Savings & Wake: Off (Recommended)"
         Write-Host "2. Network Adapter Power Savings & Wake: Default`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-1 {
+        1 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "Disabling power saving and wake settings on every network adapter is unavailable on ARM64. Use the device manufacturer's controls." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
 Write-Host "Network Adapter Power Savings & Wake: Off..."
 

@@ -8,16 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
-if (Test-UltimateArm64) {
-    Write-Host "Windows Media Creation Tool does not create Arm64 bootable media." -ForegroundColor Yellow
-    Write-Host "For this device, use its manufacturer recovery image or download the Windows 11 Arm64 ISO." -ForegroundColor Yellow
-    Start-Process "https://www.microsoft.com/software-download/windows11arm64"
-    Pause
-    exit
-}
-
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
@@ -27,6 +17,8 @@ if (Test-UltimateArm64) {
 
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
+
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
 
         Write-Host "1. Reinstall: W10"
         Write-Host "2. Reinstall: W11`n"
@@ -39,6 +31,13 @@ if (Test-UltimateArm64) {
 Clear-Host
 
 Write-Host "Downloading: Media Creation Tool Win 10..."
+
+if (Test-UltimateArm64) {
+    Write-Host "The Windows 10 Media Creation Tool creates x64 media, which cannot reinstall Windows on ARM64." -ForegroundColor Yellow
+    Write-Host "Choose the Windows 11 option for Microsoft's ARM64 installation media." -ForegroundColor Yellow
+    Pause
+    exit
+}
 
 # download media creation tool win 10
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/mediacreationtoolw10.exe" -OutFile "$env:SystemRoot\Temp\mediacreationtoolw10.exe"
@@ -54,6 +53,11 @@ exit
 Clear-Host
 
 Write-Host "Downloading: Media Creation Tool Win 11..."
+
+if (Test-UltimateArm64) {
+    Start-Process "https://www.microsoft.com/software-download/windows11arm64"
+    exit
+}
 
 # download media creation tool win 11
 IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/mediacreationtoolw11.exe" -OutFile "$env:SystemRoot\Temp\mediacreationtoolw11.exe"

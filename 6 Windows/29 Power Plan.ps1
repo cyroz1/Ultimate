@@ -8,28 +8,15 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "The performance preset changes desktop CPU, PCIe, sleep, hibernate and battery settings. ARM64 power behavior is managed by the device manufacturer." -ForegroundColor Yellow
-    Write-Host "Use Windows Power & battery settings for supported controls."
-}
-
         Write-Host "1. Power Plan: On (Recommended)"
         Write-Host "2. Power Plan: Default`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-1 {
+        1 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "The desktop power plan is unavailable on ARM64 because it can disable sleep, hibernate and battery protections." -ForegroundColor Yellow
-    Start-Process "ms-settings:powersleep"
-    Pause
-    exit
-}
 
 # import ultimate power plan
 cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
@@ -250,13 +237,6 @@ exit
         2 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "Windows Power & battery settings use the device manufacturer's ARM64 power configuration; the legacy scheme reset can remove OEM plans." -ForegroundColor Yellow
-    Start-Process "ms-settings:powersleep"
-    Pause
-    exit
-}
 
 # restore powerplans
 powercfg -restoredefaultschemes

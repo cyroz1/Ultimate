@@ -8,11 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "On ARM64, only the reset option is available. Keep driver code-integrity policy under Windows and the device manufacturer policy." -ForegroundColor Yellow
-}
-
         Write-Host "Driver WHQL Secure Boot Bypass:"
         Write-Host "1. Off (Default)"
         Write-Host "2. On`n"
@@ -33,12 +28,6 @@ exit
         2 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "Enabling this driver code-integrity bypass is unavailable on Windows on Arm." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
 # driver whql secure boot bypass
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy`" /v `"WHQLSettings`" /t REG_DWORD /d `"1`" /f >nul 2>&1"

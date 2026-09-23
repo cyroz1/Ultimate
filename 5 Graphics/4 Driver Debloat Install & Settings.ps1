@@ -9,7 +9,7 @@
         Clear-Host
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'The graphics driver debloat and install workflow' -Reason 'It extracts and runs x64 vendor driver installers. Use Windows Update or the device manufacturer for native ARM64 drivers.') {
+if (Stop-UltimateArm64UnsupportedKernelDriver -Feature 'The bundled graphics driver installer' -Reason 'This workflow extracts and installs x64 vendor kernel drivers. Open Windows Update to obtain a driver built for ARM64.') {
     Start-Process 'ms-settings:windowsupdate'
     Pause
     exit

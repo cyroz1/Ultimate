@@ -10,6 +10,8 @@
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
 
+. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
@@ -234,15 +236,17 @@ $_.Name -like '*Xbox*' -or
 $_.Name -like '*Store*'
 } | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 
-# install WebView2 using Microsoft's architecture-matching Evergreen bootstrapper
-$webViewInstaller = "$env:SystemRoot\Temp\edgewebview2setup.exe"
-IWR "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $webViewInstaller
-Start-Process -Wait $webViewInstaller -ArgumentList "/silent /install"
-
 if (Test-UltimateArm64) {
-    Write-Host "The bundled Game Bar repair tool is not validated for ARM64; Windows has re-registered the native gaming packages." -ForegroundColor Yellow
-    Pause
-    exit
+    # Download the architecture-matching WebView2 Evergreen runtime.
+    $webViewInstaller = "$env:SystemRoot\Temp\edgewebview2setup.exe"
+    IWR "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $webViewInstaller
+    Start-Process -Wait $webViewInstaller -ArgumentList "/silent /install"
+} else {
+    # download edge webview installer
+    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/edgewebview.exe" -OutFile "$env:SystemRoot\Temp\edgewebview.exe"
+
+    # start edge webview installer
+    Start-Process -Wait "$env:SystemRoot\Temp\edgewebview.exe"
 }
 
 # download gamebar repair tool

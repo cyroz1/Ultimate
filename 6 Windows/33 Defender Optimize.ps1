@@ -8,26 +8,15 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "On ARM64, the security-reducing optimization preset is unavailable. Use the Default option to restore Windows driver and memory-integrity protections." -ForegroundColor Yellow
-}
-
         Write-Host "1. Defender: Optimize (Recommended)"
         Write-Host "2. Defender: Default`n"
         while ($true) {
         $choice = Read-Host " "
         if ($choice -match '^[1-2]$') {
         switch ($choice) {
-1 {
+        1 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "This preset disables memory integrity and vulnerable-driver protections, which are especially important for ARM64 kernel drivers." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
 Write-Host "Defender Optimize: On...`n"
 

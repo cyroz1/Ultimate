@@ -9,10 +9,6 @@
         Clear-Host
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'The SMT/HT affinity preset' -Reason 'Its alternating-processor mask assumes x86 SMT thread ordering and can disable the wrong cores on ARM64 SoCs.') {
-    Pause
-    exit
-}
 
 		Write-Host "TEMPORARILY DISABLE CPU THREADS FOR TESTING PER APP/GAME`n"
         Write-Host "SMT/HT:"
@@ -26,34 +22,46 @@ if (Stop-UltimateArm64UnsupportedFeature -Feature 'The SMT/HT affinity preset' -
 
 Clear-Host
 
-# get number of logical processors
-$NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
-
-# convert input to integer
-$NOLP = [int]$NOLP
-
-# convert input to binary value with smt/ht off
-$binary = ""
-for ($i = 0; $i -lt $NOLP; $i++) {
-if ($i % 2 -eq 0) {
-$binary += "0"
+if (Test-UltimateArm64) {
+    try {
+        $NOLP = Get-UltimateArm64LogicalProcessorCount
+        $arm64AffinityMask = [UInt64](Get-UltimateArm64ProcessorAffinityMask -Mode SingleThreadPerCore)
+        $hexadecimal = Format-UltimateArm64ProcessorAffinityMask -Mask $arm64AffinityMask
+    } catch {
+        Write-Host "Could not read ARM64 processor topology: $($_.Exception.Message)" -ForegroundColor Yellow
+        Pause
+        exit
+    }
 } else {
-$binary += "1"
-}
-}
+    # get number of logical processors
+    $NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
 
-# ensure binary length is multiple of 4 padding with leading zeros if needed
-$binary = $binary.PadLeft([math]::Ceiling($binary.Length / 4) * 4, "0")
+    # convert input to integer
+    $NOLP = [int]$NOLP
 
-# convert binary to hexadecimal
-$hexadecimal = ""
-for ($i = 0; $i -lt $binary.Length; $i += 4) {
-$binchunk = $binary.Substring($i, 4)
-$hexadecimal += [Convert]::ToString([Convert]::ToInt32($binchunk, 2), 16)
+    # convert input to binary value with smt/ht off
+    $binary = ""
+    for ($i = 0; $i -lt $NOLP; $i++) {
+    if ($i % 2 -eq 0) {
+    $binary += "0"
+    } else {
+    $binary += "1"
+    }
+    }
+
+    # ensure binary length is multiple of 4 padding with leading zeros if needed
+    $binary = $binary.PadLeft([math]::Ceiling($binary.Length / 4) * 4, "0")
+
+    # convert binary to hexadecimal
+    $hexadecimal = ""
+    for ($i = 0; $i -lt $binary.Length; $i += 4) {
+    $binchunk = $binary.Substring($i, 4)
+    $hexadecimal += [Convert]::ToString([Convert]::ToInt32($binchunk, 2), 16)
+    }
+
+    # convert hexadecimal to an integer
+    $hexadecimal = [Convert]::ToInt32($hexadecimal, 16)
 }
-
-# convert hexadecimal to an integer
-$hexadecimal = [Convert]::ToInt32($hexadecimal, 16)
 
 # copy game exe id
 (Get-Process | Where-Object {$_.WorkingSet64 -gt 500MB} | Select-Object Name, Id) | Format-Table -AutoSize
@@ -63,14 +71,23 @@ Clear-Host
 
 # set game exe smt/ht off
 $smthtoff = Get-Process -Id $exeid
-$smthtoff.ProcessorAffinity = $hexadecimal
+if (Test-UltimateArm64) {
+    $smthtoff.ProcessorAffinity = Convert-UltimateArm64ProcessorAffinityMaskToNative -Mask $arm64AffinityMask
+} else {
+    $smthtoff.ProcessorAffinity = $hexadecimal
+}
 
 # check new value
 $reloadexeid = Get-Process -Id $exeid
 
 # show new value
-$showvalue = [Convert]::ToString([int]$reloadexeid.ProcessorAffinity, 2).PadLeft($NOLP, '0')
-Write-Host "ID - $exeid = $showvalue`n"
+if (Test-UltimateArm64) {
+    $showvalue = Format-UltimateArm64NativeProcessorAffinityMask -Mask $reloadexeid.ProcessorAffinity
+    Write-Host "ID - $exeid = 0x$showvalue`n"
+} else {
+    $showvalue = [Convert]::ToString([int]$reloadexeid.ProcessorAffinity, 2).PadLeft($NOLP, '0')
+    Write-Host "ID - $exeid = $showvalue`n"
+}
 
 Pause
 
@@ -85,30 +102,42 @@ Clear-Host
 $stop = "Battle.net", "BsgLauncher", "EADesktop", "EpicGamesLauncher", "GalaxyClient", "RobloxPlayerBeta", "RiotClientServices", "Launcher", "steam", "upc"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 
-# get number of logical processors
-$NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
-
-# convert input to integer
-$NOLP = [int]$NOLP
-
-# convert input to binary value with smt/ht off
-$binary = ""
-for ($i = 0; $i -lt $NOLP; $i++) {
-if ($i % 2 -eq 0) {
-$binary += "0"
+if (Test-UltimateArm64) {
+    try {
+        $NOLP = Get-UltimateArm64LogicalProcessorCount
+        $arm64AffinityMask = [UInt64](Get-UltimateArm64ProcessorAffinityMask -Mode SingleThreadPerCore)
+        $hexadecimal = Format-UltimateArm64ProcessorAffinityMask -Mask $arm64AffinityMask
+    } catch {
+        Write-Host "Could not read ARM64 processor topology: $($_.Exception.Message)" -ForegroundColor Yellow
+        Pause
+        exit
+    }
 } else {
-$binary += "1"
-}
-}
+    # get number of logical processors
+    $NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
 
-# ensure binary length is multiple of 4 padding with leading zeros if needed
-$binary = $binary.PadLeft([math]::Ceiling($binary.Length / 4) * 4, "0")
+    # convert input to integer
+    $NOLP = [int]$NOLP
 
-# convert binary to hexadecimal
-$hexadecimal = ""
-for ($i = 0; $i -lt $binary.Length; $i += 4) {
-$binchunk = $binary.Substring($i, 4)
-$hexadecimal += [Convert]::ToString([Convert]::ToInt32($binchunk, 2), 16)
+    # convert input to binary value with smt/ht off
+    $binary = ""
+    for ($i = 0; $i -lt $NOLP; $i++) {
+    if ($i % 2 -eq 0) {
+    $binary += "0"
+    } else {
+    $binary += "1"
+    }
+    }
+
+    # ensure binary length is multiple of 4 padding with leading zeros if needed
+    $binary = $binary.PadLeft([math]::Ceiling($binary.Length / 4) * 4, "0")
+
+    # convert binary to hexadecimal
+    $hexadecimal = ""
+    for ($i = 0; $i -lt $binary.Length; $i += 4) {
+    $binchunk = $binary.Substring($i, 4)
+    $hexadecimal += [Convert]::ToString([Convert]::ToInt32($binchunk, 2), 16)
+    }
 }
 
 # select game launcher lnk or exe
@@ -134,14 +163,20 @@ $gamelauncher = [System.IO.Path]::GetFileNameWithoutExtension($gamelauncher)
 $reloadgamelauncher = (Get-Process -Name "$gamelauncher").ProcessorAffinity
 
 # convert value
-$showvalue = [Convert]::ToString([int]$reloadgamelauncher, 2)
+if (Test-UltimateArm64) {
+    $showvalue = Format-UltimateArm64NativeProcessorAffinityMask -Mask $reloadgamelauncher
+    Clear-Host
+    Write-Host "EXE - $gamelauncher = 0x$showvalue`n"
+} else {
+    $showvalue = [Convert]::ToString([int]$reloadgamelauncher, 2)
 
-Clear-Host
+    Clear-Host
 
-# show new value
-$NOLPlength = $NOLP
-$showvalue = $showvalue.PadLeft($NOLPlength, "0")
-Write-Host "EXE - $gamelauncher = $showvalue`n"
+    # show new value
+    $NOLPlength = $NOLP
+    $showvalue = $showvalue.PadLeft($NOLPlength, "0")
+    Write-Host "EXE - $gamelauncher = $showvalue`n"
+}
 
 Pause
 

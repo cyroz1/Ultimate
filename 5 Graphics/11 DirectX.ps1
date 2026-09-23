@@ -9,11 +9,6 @@
         Clear-Host
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if ((Test-UltimateArm64) -and (Get-UltimateWindowsBuild) -lt 22000) {
-    Write-Host "The bundled legacy DirectX redistributable is not verified for Windows 10 on Arm. Install the runtime components supplied with your game or app instead." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {

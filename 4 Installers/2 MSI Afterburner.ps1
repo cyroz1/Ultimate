@@ -9,7 +9,7 @@
         Clear-Host
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedFeature -Feature 'MSI Afterburner' -Reason 'This installer and its hardware-monitoring driver target x64 systems. Use monitoring tools supplied for your ARM64 device.') {
+if (Stop-UltimateArm64UnsupportedKernelDriver -Feature 'MSI Afterburner and RivaTuner Statistics Server' -Reason 'The bundled monitoring driver is x64-only, and ARM64 Windows cannot load x64 kernel drivers.') {
     Pause
     exit
 }

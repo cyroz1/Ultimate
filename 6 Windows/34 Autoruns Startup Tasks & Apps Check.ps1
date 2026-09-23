@@ -9,13 +9,6 @@
         Clear-Host
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "This workflow removes third-party startup entries and scheduled tasks, including possible ARM64 OEM utilities. It is unavailable on ARM64." -ForegroundColor Yellow
-    Write-Host "Open Microsoft's current ARM64 Sysinternals Suite for a manual startup review."
-    Start-Process "https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite"
-    Pause
-    exit
-}
 
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
@@ -92,7 +85,14 @@ Remove-Item $_.FullName -Recurse -Force
 New-Item -Path "$env:SystemDrive\Program Files (x86)\Autoruns" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
 # download autoruns
-IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/autoruns.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
+if (Test-UltimateArm64) {
+    $sysinternalsArchive = "$env:SystemRoot\Temp\SysinternalsSuite-ARM64.zip"
+    IWR "https://download.sysinternals.com/files/SysinternalsSuite-ARM64.zip" -OutFile $sysinternalsArchive
+    Expand-Archive -Path $sysinternalsArchive -DestinationPath "$env:SystemDrive\Program Files (x86)\Autoruns" -Force
+    Copy-Item -Path "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns64a.exe" -Destination "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe" -Force
+} else {
+    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/autoruns.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
+}
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell

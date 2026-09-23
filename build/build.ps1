@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.7",
+    [string]$Version = "0.1.8",
     [ValidateSet("all", "x64", "arm64")]
     [string]$Architecture = "all"
 )
@@ -9,7 +9,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $distRoot = Join-Path $repoRoot "dist"
 $versionText = ($Version -replace '^v', '').Trim()
 if ($versionText -notmatch '^\d+(\.\d+){0,3}$') {
-    throw "Version must contain only numeric components, for example 0.1.7."
+    throw "Version must contain only numeric components, for example 0.1.8."
 }
 
 $versionParts = @($versionText.Split('.'))

@@ -8,11 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Test-UltimateArm64) {
-    Write-Host "Use the storage driver and NVMe configuration supplied by Windows Update or the device manufacturer on ARM64." -ForegroundColor Yellow
-}
-
         Write-Host "BREAKS MICROSOFT DIRECT STORAGE" -ForegroundColor Red
         Write-Host "1. NVME: Faster Driver (Recommended)"
         Write-Host "2. NVME: Default`n"
@@ -23,12 +18,6 @@ if (Test-UltimateArm64) {
         1 {
 
 Clear-Host
-
-if (Test-UltimateArm64) {
-    Write-Host "The forced NVMe driver feature override is not validated for ARM64 device storage controllers." -ForegroundColor Yellow
-    Pause
-    exit
-}
 
 Write-Host "NVME: Faster Driver..."
 
@@ -52,10 +41,7 @@ Clear-Host
 Write-Host "NVME: Default..."
 
 # revert new nvme driver
-$overridePath = "HKLM:\SYSTEM\CurrentControlSet\Policies\Microsoft\FeatureManagement\Overrides"
-foreach ($featureId in @("735209102", "3244671118", "1853569164", "156965516")) {
-    Remove-ItemProperty -LiteralPath $overridePath -Name $featureId -ErrorAction SilentlyContinue
-}
+cmd /c "reg delete `"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies\Microsoft`" /f >nul 2>&1"
 
 # revert safe & safe network boot fix for new nvme driver
 cmd /c "reg delete `"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Network\{75416E63-5912-4DFA-AE8F-3EFACCAFFB14}`" /f >nul 2>&1"

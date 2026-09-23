@@ -95,7 +95,7 @@ Stop-Process -Name "msedge" -Force -ErrorAction SilentlyContinue
 
 # download edge installer
 if (Test-UltimateArm64) {
-    Write-Host "Opening Microsoft's Edge download page to obtain the native ARM64 browser installer."
+    Write-Host "Opening Microsoft's Edge download page to obtain the native ARM64 browser installer." -ForegroundColor Yellow
     Start-Process "https://www.microsoft.com/edge/download"
     exit
 }

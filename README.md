@@ -7,7 +7,7 @@
 
 This fork adds a native Windows Forms launcher for the complete PowerShell toolkit. The launcher discovers every original `.ps1` script, turns numeric menus into native radio controls, provides fields for account/USB/process/priority values, and runs the untouched script through a hidden PowerShell host. Users do not need to open a terminal or type menu choices.
 
-The UI does not translate or reimplement toolkit commands: it starts Windows PowerShell and invokes each selected script directly. Architecture-sensitive scripts share an operating-system architecture check so ARM64 releases can use native downloads and device-appropriate guidance, while avoiding x64 driver installers and desktop hardware presets that are not valid for ARM64. The UI supplies only the prompt and file-picker transport, so `Read-Host`, `Pause`, and the scripts' native `OpenFileDialog` calls do not require a visible console.
+The UI does not translate or reimplement toolkit commands: it starts Windows PowerShell and invokes each selected script directly. Architecture-sensitive scripts share an operating-system architecture check so they can select a compatible program or package when the original binary cannot run on ARM64. The UI supplies only the prompt and file-picker transport, so `Read-Host`, `Pause`, and the scripts' native `OpenFileDialog` calls do not require a visible console.
 
 The application requests administrator rights because the original scripts change system settings. A Windows UAC prompt may still appear; that is the standard Windows security prompt, not a console window. Some scripts intentionally open Windows Settings, browsers, installers, or other graphical tools.
 
@@ -24,7 +24,7 @@ Each package contains its own architecture-targeted GUI and a separate copy of t
 
 ### Windows on ARM
 
-Windows 11 on Arm can run many x86 and x64 user applications through emulation, but kernel drivers and print drivers must be native ARM64. The toolkit therefore keeps ordinary app installers available, uses native ARM64 builds where provided, directs graphics/network drivers to Windows Update or the device manufacturer, and disables driver, firmware and CPU-affinity presets that assume x64 desktop hardware. Windows 10 on Arm only emulates x86 apps, so some x64 installer options require Windows 11.
+Windows on Arm can emulate x86 applications; Windows 11 can also emulate x64 applications. Kernel drivers must be native ARM64. Scripts that include x64-only drivers direct those specific installs to Windows Update, and the CPU-affinity scripts use the processor topology reported by Windows on ARM. Other tuning settings and optimization choices remain available as before. Because Windows 10 on Arm does not emulate x64 apps, bundled x64 programs require Windows 11 on Arm.
 
 ### Build on Windows
 
@@ -36,13 +36,13 @@ wix extension add -g WixToolset.UI.wixext/5.0.2
 ```
 
 ```powershell
-.\build\build.ps1 -Version 0.1.7
+.\build\build.ps1 -Version 0.1.8
 ```
 
 The command writes both native MSIs and portable script/GUI bundles to `dist`:
 
-- `Ultimate-UI-v0.1.7-win-x64.msi` and `.zip`
-- `Ultimate-UI-v0.1.7-win-arm64.msi` and `.zip`
+- `Ultimate-UI-v0.1.8-win-x64.msi` and `.zip`
+- `Ultimate-UI-v0.1.8-win-arm64.msi` and `.zip`
 
 Use `-Architecture x64` or `-Architecture arm64` to build one target. Pushing a `v*` tag builds both targets and publishes all four artifacts as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
 

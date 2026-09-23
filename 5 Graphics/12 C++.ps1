@@ -24,7 +24,7 @@ Write-Host "Downloading: C++..."
 
 $arm64Windows10 = (Test-UltimateArm64) -and ((Get-UltimateWindowsBuild) -lt 22000)
 if ($arm64Windows10) {
-    Write-Host "Windows 10 on Arm supports x86 emulation but not x64 emulation; installing x86 and native ARM64 runtimes." -ForegroundColor Yellow
+    Write-Host "Windows 10 on Arm emulates x86 apps but not x64 apps; installing the x86 and ARM64 runtimes." -ForegroundColor Yellow
 }
 
 # download c++
@@ -42,19 +42,20 @@ if (-not $arm64Windows10) {
     IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2013_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2013_x64.exe"
 }
 
-$latestRuntime64File = "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe"
 if (Test-UltimateArm64) {
-    # The official x64 package includes both ARM64 and x64 runtimes.
     IWR "https://aka.ms/vc14/vc_redist.x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x86.exe"
     if ($arm64Windows10) {
         $latestRuntime64File = "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_arm64.exe"
         IWR "https://aka.ms/vc14/vc_redist.arm64.exe" -OutFile $latestRuntime64File
     } else {
+        # The official x64 package also installs ARM64 runtime binaries on ARM64 Windows.
+        $latestRuntime64File = "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe"
         IWR "https://aka.ms/vc14/vc_redist.x64.exe" -OutFile $latestRuntime64File
     }
 } else {
     IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2015_2017_2019_2022_x86.exe" -OutFile "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x86.exe"
-    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2015_2017_2019_2022_x64.exe" -OutFile "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe"
+    $latestRuntime64File = "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe"
+    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/vcredist2015_2017_2019_2022_x64.exe" -OutFile $latestRuntime64File
 }
 
 Clear-Host
