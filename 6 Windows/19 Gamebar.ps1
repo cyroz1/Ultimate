@@ -10,8 +10,6 @@
 
 . (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
