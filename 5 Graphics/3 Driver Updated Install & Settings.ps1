@@ -8,13 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedKernelDriver -Feature 'The bundled graphics driver installers' -Reason 'This workflow installs x64 vendor kernel drivers. Open Windows Update to obtain a driver built for ARM64.') {
-    Start-Process 'ms-settings:windowsupdate'
-    Pause
-    exit
-}
-
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red

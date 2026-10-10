@@ -8,8 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
 		Write-Host "TEMPORARILY DISABLE CPU CORE 1 & THREAD 1 FOR TESTING PER APP/GAME`n"
         Write-Host "CORE 1 THREAD 1:"
         Write-Host "1. Off: Already Running"
@@ -22,26 +20,14 @@
 
 Clear-Host
 
-if (Test-UltimateArm64) {
-    try {
-        $NOLP = Get-UltimateArm64LogicalProcessorCount
-        $arm64AffinityMask = [UInt64](Get-UltimateArm64ProcessorAffinityMask -Mode WithoutFirstCore)
-        $hexadecimal = Format-UltimateArm64ProcessorAffinityMask -Mask $arm64AffinityMask
-    } catch {
-        Write-Host "Could not read ARM64 processor topology: $($_.Exception.Message)" -ForegroundColor Yellow
-        Pause
-        exit
-    }
-} else {
-    # get number of logical processors
-    $NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
+# get number of logical processors
+$NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
 
-    # convert input to integer
-    $NOLP = [int]$NOLP
+# convert input to integer
+$NOLP = [int]$NOLP
 
-    # set affinity mask with core 1 and thread 1 disabled (exclude bit 0 and bit 1)
-    $hexadecimal = [int]([math]::Pow(2, $NOLP) - 1) - 3
-}
+# set affinity mask with core 1 and thread 1 disabled (exclude bit 0 and bit 1)
+$hexadecimal = [int]([math]::Pow(2, $NOLP) - 1) - 3
 
 # copy game exe id
 (Get-Process | Where-Object {$_.WorkingSet64 -gt 500MB} | Select-Object Name, Id) | Format-Table -AutoSize
@@ -51,23 +37,14 @@ Clear-Host
 
 # set game exe core1/thread1 off
 $smthtoff = Get-Process -Id $exeid
-if (Test-UltimateArm64) {
-    $smthtoff.ProcessorAffinity = Convert-UltimateArm64ProcessorAffinityMaskToNative -Mask $arm64AffinityMask
-} else {
-    $smthtoff.ProcessorAffinity = $hexadecimal
-}
+$smthtoff.ProcessorAffinity = $hexadecimal
 
 # check new value
 $reloadexeid = Get-Process -Id $exeid
 
 # show new value
-if (Test-UltimateArm64) {
-    $showvalue = Format-UltimateArm64NativeProcessorAffinityMask -Mask $reloadexeid.ProcessorAffinity
-    Write-Host "ID - $exeid = 0x$showvalue`n"
-} else {
-    $showvalue = [Convert]::ToString([int]$reloadexeid.ProcessorAffinity, 2).PadLeft($NOLP, '0')
-    Write-Host "ID - $exeid = $showvalue`n"
-}
+$showvalue = [Convert]::ToString([int]$reloadexeid.ProcessorAffinity, 2).PadLeft($NOLP, '0')
+Write-Host "ID - $exeid = $showvalue`n"
 
 Pause
 
@@ -82,27 +59,15 @@ Clear-Host
 $stop = "Battle.net", "BsgLauncher", "EADesktop", "EpicGamesLauncher", "GalaxyClient", "RobloxPlayerBeta", "RiotClientServices", "Launcher", "steam", "upc"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 
-if (Test-UltimateArm64) {
-    try {
-        $NOLP = Get-UltimateArm64LogicalProcessorCount
-        $arm64AffinityMask = [UInt64](Get-UltimateArm64ProcessorAffinityMask -Mode WithoutFirstCore)
-        $hexadecimal = Format-UltimateArm64ProcessorAffinityMask -Mask $arm64AffinityMask
-    } catch {
-        Write-Host "Could not read ARM64 processor topology: $($_.Exception.Message)" -ForegroundColor Yellow
-        Pause
-        exit
-    }
-} else {
-    # get number of logical processors
-    $NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
+# get number of logical processors
+$NOLP = (Get-WmiObject Win32_ComputerSystem).NumberOfLogicalProcessors
 
-    # convert input to integer
-    $NOLP = [int]$NOLP
+# convert input to integer
+$NOLP = [int]$NOLP
 
-    # set affinity mask with core 1 and thread 1 disabled (exclude bit 0 and bit 1)
-    $affinity = [int]([math]::Pow(2, $NOLP) - 1) - 3
-    $hexadecimal = "{0:X}" -f $affinity
-}
+# set affinity mask with core 1 and thread 1 disabled (exclude bit 0 and bit 1)
+$affinity = [int]([math]::Pow(2, $NOLP) - 1) - 3
+$hexadecimal = "{0:X}" -f $affinity
 
 # select game launcher lnk or exe
 Write-Host "SELECT LAUNCHER/GAME/SHORTCUT/EXE:"
@@ -128,19 +93,13 @@ $gamelauncher = [System.IO.Path]::GetFileNameWithoutExtension($gamelauncher)
 $reloadgamelauncher = (Get-Process -Name "$gamelauncher").ProcessorAffinity
 
 # convert value
-if (Test-UltimateArm64) {
-    $showvalue = Format-UltimateArm64NativeProcessorAffinityMask -Mask $reloadgamelauncher
-    Clear-Host
-    Write-Host "EXE - $gamelauncher = 0x$showvalue`n"
-} else {
-    $showvalue = [Convert]::ToString([int]$reloadgamelauncher, 2)
+$showvalue = [Convert]::ToString([int]$reloadgamelauncher, 2)
 
-    Clear-Host
+Clear-Host
 
-    # show new value
-    $showvalue = $showvalue.PadLeft($NOLP, "0")
-    Write-Host "EXE - $gamelauncher = $showvalue`n"
-}
+# show new value
+$showvalue = $showvalue.PadLeft($NOLP, "0")
+Write-Host "EXE - $gamelauncher = $showvalue`n"
 
 Pause
 

@@ -8,8 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
         Write-Host "1. Timer Resolution: On (Recommended)"
         Write-Host "2. Timer Resolution: Default`n"
         while ($true) {
@@ -221,12 +219,7 @@ namespace WindowsService
 Set-Content -Path "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -Value $csfile -Force
 
 # compile and create service
-$compilerPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
-if ((Test-UltimateArm64) -and ((Get-UltimateWindowsBuild) -lt 22000)) {
-    # Windows 10 on Arm emulates x86 but not x64 applications.
-    $compilerPath = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"
-}
-Start-Process -Wait $compilerPath -ArgumentList "-out:C:\Windows\SetTimerResolutionService.exe C:\Windows\SetTimerResolutionService.cs" -WindowStyle Hidden
+Start-Process -Wait "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -ArgumentList "-out:C:\Windows\SetTimerResolutionService.exe C:\Windows\SetTimerResolutionService.cs" -WindowStyle Hidden
 
 # remove cs file
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null

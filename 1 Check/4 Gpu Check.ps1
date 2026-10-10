@@ -18,20 +18,13 @@
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
+Write-Host "Downloading: Gpu Z..."
 
-if (Test-UltimateArm64) {
-    # GPU-Z added native Arm64 support in version 2.60; use its current release page.
-    Start-Process "https://www.techpowerup.com/download/techpowerup-gpu-z/"
-} else {
-    Write-Host "Downloading: Gpu Z..."
+# download gpuz
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/gpuz.exe" -OutFile "$env:SystemRoot\Temp\gpuz.exe"
 
-    # download gpuz
-    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/gpuz.exe" -OutFile "$env:SystemRoot\Temp\gpuz.exe"
-
-    # start gpuz
-    Start-Process "$env:SystemRoot\Temp\gpuz.exe"
-}
+# start gpuz
+Start-Process "$env:SystemRoot\Temp\gpuz.exe"
 
 Clear-Host
 Write-Host "GPU CHECK"

@@ -8,8 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
 # save autounattendtemplate
 $AutoUnattend = @'
 <?xml version="1.0" encoding="utf-8"?>
@@ -151,10 +149,6 @@ $AutoUnattend = @'
     </settings>
 </unattend>
 '@
-$AutoUnattend = $AutoUnattend.Replace(
-    'processorArchitecture="amd64"',
-    'processorArchitecture="' + (Get-UltimateUnattendArchitecture) + '"'
-)
 Set-Content -Path "$env:SystemRoot\Temp\autounattendtemplate.xml" -Value $AutoUnattend -Force
 
 # user input change account name in autounattendtemplate

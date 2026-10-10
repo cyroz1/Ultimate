@@ -8,8 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-
         # SCRIPT SILENT
         $progresspreference = 'silentlycontinue'
 
@@ -85,14 +83,7 @@ Remove-Item $_.FullName -Recurse -Force
 New-Item -Path "$env:SystemDrive\Program Files (x86)\Autoruns" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
 # download autoruns
-if (Test-UltimateArm64) {
-    $sysinternalsArchive = "$env:SystemRoot\Temp\SysinternalsSuite-ARM64.zip"
-    IWR "https://download.sysinternals.com/files/SysinternalsSuite-ARM64.zip" -OutFile $sysinternalsArchive
-    Expand-Archive -Path $sysinternalsArchive -DestinationPath "$env:SystemDrive\Program Files (x86)\Autoruns" -Force
-    Copy-Item -Path "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns64a.exe" -Destination "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe" -Force
-} else {
-    IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/autoruns.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
-}
+IWR "https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/autoruns.exe" -OutFile "$env:SystemDrive\Program Files (x86)\Autoruns\Autoruns.exe"
 
 # create desktop shortcut
 $WshShell = New-Object -comObject WScript.Shell

@@ -8,12 +8,6 @@
         $Host.PrivateData.ProgressForegroundColor = "White"
         Clear-Host
 
-. (Join-Path $PSScriptRoot '..\ui\UltimateArchitecture.ps1')
-if (Stop-UltimateArm64UnsupportedKernelDriver -Feature 'MSI Afterburner and RivaTuner Statistics Server' -Reason 'The bundled monitoring driver is x64-only, and ARM64 Windows cannot load x64 kernel drivers.') {
-    Pause
-    exit
-}
-
         # SCRIPT CHECK INTERNET
         if (!(Test-Connection -ComputerName "8.8.8.8" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
         Write-Host "Internet Connection Required`n" -ForegroundColor Red
