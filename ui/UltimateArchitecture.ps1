@@ -44,7 +44,7 @@ function Get-UltimateWindowsBuild {
 
 function Get-Ultimate7ZipInstallerUri {
     if (Test-UltimateArm64) {
-        return 'https://github.com/ip7z/7zip/releases/download/26.03/7z2603-arm64.exe'
+        return 'https://github.com/ip7z/7zip/releases/download/26.04/7z2604-arm64.exe'
     }
 
     return 'https://github.com/FR33THYFR33THY/Ultimate/releases/download/Files/7zip.exe'

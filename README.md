@@ -36,13 +36,13 @@ wix extension add -g WixToolset.UI.wixext/5.0.2
 ```
 
 ```powershell
-.\build\build.ps1 -Version 0.1.8
+.\build\build.ps1 -Version 0.1.9
 ```
 
 The command writes both native MSIs and portable script/GUI bundles to `dist`:
 
-- `Ultimate-UI-v0.1.8-win-x64.msi` and `.zip`
-- `Ultimate-UI-v0.1.8-win-arm64.msi` and `.zip`
+- `Ultimate-UI-v0.1.9-win-x64.msi` and `.zip`
+- `Ultimate-UI-v0.1.9-win-arm64.msi` and `.zip`
 
 Use `-Architecture x64` or `-Architecture arm64` to build one target. Pushing a `v*` tag builds both targets and publishes all four artifacts as a GitHub release through [`.github/workflows/release.yml`](.github/workflows/release.yml).
 
